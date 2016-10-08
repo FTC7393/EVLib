@@ -9,3 +9,5 @@ fi
 gradle build -p $1/EVLib
 # Copy the EVLib module
 cp -r $1/EVLib/ .
+# Copy the library
+cp $1/EVLib/build/outputs/aar/EVLib-release.aar .
