@@ -65,4 +65,8 @@ public class Servos {
         //servoPos.add("time", System.currentTimeMillis());
         servoPos.writeToFile(FileUtil.getFile(filename));
     }
+
+    public Map<ServoName, ServoControl> getServoMap() {
+        return servoMap;
+    }
 }

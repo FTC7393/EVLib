@@ -41,7 +41,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
         Telem.telemetry = telemetry; //store the telemetry in a global location
         matchTimer = new MatchTimer(getMatchTime()); //create the MatchTimer
         robotCfg = createHardwareCfg(); //ask the OpMode for the HardwareCfg object
-        servos = new Servos(robotCfg.getServoMap()); //create the servos object
+        servos = robotCfg.getServos(); //create the servos object
 
         setup();
     }

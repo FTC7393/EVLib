@@ -1,6 +1,6 @@
 package ftc.evlib.opmodes;
 
-import ftc.electronvolts.util.InputScaler;
+import ftc.electronvolts.util.Function;
 import ftc.evlib.driverstation.GamepadManager;
 import ftc.evlib.hardware.config.RobotCfg;
 
@@ -14,7 +14,7 @@ public abstract class AbstractTeleOp<Type extends RobotCfg> extends AbstractOp<T
     public GamepadManager driver1;
     public GamepadManager driver2;
 
-    protected abstract InputScaler getJoystickInputScaler();
+    protected abstract Function getJoystickScalingFunction();
 
     @Override
     public int getMatchTime() {
@@ -27,8 +27,8 @@ public abstract class AbstractTeleOp<Type extends RobotCfg> extends AbstractOp<T
         gamepad1.setJoystickDeadzone(.1F);
         gamepad2.setJoystickDeadzone(.1F);
         //store the gamepads
-        driver1 = new GamepadManager(gamepad1, getJoystickInputScaler());
-        driver2 = new GamepadManager(gamepad2, getJoystickInputScaler());
+        driver1 = new GamepadManager(gamepad1, getJoystickScalingFunction());
+        driver2 = new GamepadManager(gamepad2, getJoystickScalingFunction());
         super.start();
     }
 

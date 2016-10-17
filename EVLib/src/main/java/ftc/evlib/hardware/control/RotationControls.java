@@ -96,7 +96,7 @@ public class RotationControls {
                 Vector3D gyroVector = Vector3D.fromPolar2D(1, Angle.fromDegrees(gyroHeading));
 
                 //find the "signed angular separation", the magnitude and direction of the error
-                double angleRadians = Vector3D.signedAngularSeparation(targetHeadingVector, gyroVector).getValueRadians();
+                double angleRadians = Vector3D.signedAngularSeparation(targetHeadingVector, gyroVector).radians();
                 telemetry.addData("signed angular separation", angleRadians);
 
 //              This graph shows angle error vs. rotation correction

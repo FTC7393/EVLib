@@ -40,6 +40,8 @@ public class MecanumControl {
     }
 
     public void stopMotors() {
+        translationControl = TranslationControls.zero();
+        rotationControl = RotationControls.zero();
         mecanumMotors.stopMotors();
     }
 
@@ -59,8 +61,8 @@ public class MecanumControl {
         Vector2D translation = translationControl.getTranslation();
 
         double velocity = translation.getLength();
-        double direction = translation.getDirection().getValueRadians() +
-                rotationControl.getPolarDirectionCorrection().getValueRadians();
+        double direction = translation.getDirection().radians() +
+                rotationControl.getPolarDirectionCorrection().radians();
 
         double velocityX = velocity * Math.cos(direction);
         double velocityY = velocity * Math.sin(direction);

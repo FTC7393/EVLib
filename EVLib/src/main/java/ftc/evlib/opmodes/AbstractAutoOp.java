@@ -1,7 +1,6 @@
 package ftc.evlib.opmodes;
 
 import ftc.electronvolts.statemachine.StateMachine;
-import ftc.electronvolts.statemachine.StateMachineBuilder;
 import ftc.evlib.hardware.config.RobotCfg;
 
 /**
@@ -11,7 +10,7 @@ import ftc.evlib.hardware.config.RobotCfg;
 public abstract class AbstractAutoOp<Type extends RobotCfg> extends AbstractOp<Type> {
     private StateMachine stateMachine;
 
-    public abstract StateMachineBuilder buildStates();
+    public abstract StateMachine buildStates();
 
     @Override
     public int getMatchTime() {
@@ -20,7 +19,7 @@ public abstract class AbstractAutoOp<Type extends RobotCfg> extends AbstractOp<T
 
     @Override
     public void setup() {
-        stateMachine = buildStates().build();
+        stateMachine = buildStates();
     }
 
     @Override

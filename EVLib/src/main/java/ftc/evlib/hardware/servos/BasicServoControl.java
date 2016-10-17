@@ -32,7 +32,13 @@ public class BasicServoControl implements ServoControl {
         presets = new HashMap<>();
 
         for (Enum preset : name.getPresets()) {
-            double servoPosition = optionsFile.getAsDouble(preset.name(), 0.5);
+
+            double servoPosition = 0.5;
+            try {
+                servoPosition = optionsFile.getAsDouble(preset.name(), 0.5);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
             presets.put(preset, servoPosition);
         }
         targetPosition = presets.get(startPreset);

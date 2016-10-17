@@ -7,4 +7,7 @@ dependencies {
     compile(name: 'WirelessP2p-release', ext: 'aar')
 
     compile project(':openCVLibrary310')
+
+    compile files('../libs/state-machine-framework-0.2.1.jar')
+    compile files('../libs/guava-18.0.jar')
 }

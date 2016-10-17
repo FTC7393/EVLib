@@ -16,6 +16,4 @@ repositories {
     }
 }
 
-
-apply from: '../build.custom.gradle'
 apply from: 'build.release.gradle'

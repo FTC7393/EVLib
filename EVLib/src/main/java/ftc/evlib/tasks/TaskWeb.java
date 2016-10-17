@@ -21,15 +21,17 @@ public abstract class TaskWeb<T extends Task, B extends StateMachineBuilder> {
 
     public TeamColor allianceColor;
     public B builder;
+
     public abstract B createBuilder(StateName startState);
 
-    public TaskWeb(TeamColor allianceColor, StateName start, StateName success, StateName fail, StateName timeout) {
+    public TaskWeb(TeamColor allianceColor, StateName start, StateName success, StateName fail, StateName timeout, B builder) {
         this.allianceColor = allianceColor;
         this.startState = start;
         this.successState = success;
         this.failState = fail;
         this.timeoutState = timeout;
-        builder = createBuilder(startState);
+        this.builder = builder;
+//        builder = createBuilder(startState);
     }
 
     public void setAllianceColor(TeamColor allianceColor) {

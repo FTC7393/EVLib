@@ -8,11 +8,11 @@ import android.os.PowerManager;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import ftc.evlib.hardware.sensors.Accelerometer;
 import ftc.evlib.hardware.servos.ServoControl;
 import ftc.evlib.hardware.servos.ServoName;
+import ftc.evlib.hardware.servos.Servos;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -65,8 +65,12 @@ public abstract class RobotCfg {
         return accelerometer;
     }
 
-    public Map<ServoName, ServoControl> getServoMap() {
-        return new HashMap<>();
+    public Servos getServos() {
+        return new Servos(new HashMap<ServoName, ServoControl>());
+    }
+
+    public ServoControl getServo(ServoName servoName) {
+        return getServos().getServoMap().get(servoName);
     }
 
     public abstract void act();

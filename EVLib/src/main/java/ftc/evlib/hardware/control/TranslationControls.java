@@ -196,7 +196,7 @@ public class TranslationControls {
                     double x = location.getX() / imageWidth;
                     double width = location.getWidth() / imageWidth;
                     velocity = targetWidth - width;
-                    direction = Angle.fromDegrees(cameraViewAngle.getValueDegrees() * (x - 0.5 - targetX));
+                    direction = Angle.fromDegrees(cameraViewAngle.degrees() * (x - 0.5 - targetX));
                     return true;
                 } else {
                     return false;

@@ -132,7 +132,7 @@ public class MecanumMotors extends FourMotors {
     }
 
     public void setVelocityPolar(double velocity, Angle direction) {
-        double directionRadians = direction.getValueRadians();
+        double directionRadians = direction.radians();
         setVelocityX(velocity * Math.cos(directionRadians));
         setVelocityY(velocity * Math.sin(directionRadians));
     }
