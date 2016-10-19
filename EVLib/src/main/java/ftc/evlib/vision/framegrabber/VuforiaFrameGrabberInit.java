@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.internal.VuforiaLocalizerImpl;
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
 /**
- * This file was made by the electronVolts, FTC team 7393
+ * This file was adapted by the electronVolts, FTC team 7393
  * source: https://www.dropbox.com/s/lbezww0y8pi1ibg/VuforiaLocalizerImplSubclass.txt?dl=0
  * Credit to team 3491 FIX IT
  * Date Created: 10/6/16

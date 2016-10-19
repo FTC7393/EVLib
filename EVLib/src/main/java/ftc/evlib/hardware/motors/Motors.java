@@ -1,8 +1,9 @@
 package ftc.evlib.hardware.motors;
 
 import com.google.common.collect.ImmutableList;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,76 +34,76 @@ public class Motors {
         }
     }
 
-    public static Motor motor(boolean hasEncoder, DcMotor motor, boolean reversed) {
+    public static Motor motor(boolean hasEncoder, DcMotor dcMotor, boolean reversed) {
         if (hasEncoder) {
-            return motorWithEncoder(motor, reversed);
+            return motorWithEncoder(dcMotor, reversed);
         } else {
-            return motorWithoutEncoder(motor, reversed);
+            return motorWithoutEncoder(dcMotor, reversed);
         }
     }
 
     /**
      * combine two motors with encoders into one motor
      *
-     * @param motor1 the first motor (with encoder)
-     * @param motor2 the second motor (with encoder)
+     * @param motorEnc1 the first motor (with encoder)
+     * @param motorEnc2 the second motor (with encoder)
      * @return the motor that controls both (with encoder support)
      */
-    public static MotorEnc combinedWithEncoder(MotorEnc motor1, MotorEnc motor2) {
-        return combinedWithEncoder(ImmutableList.of(motor1, motor2));
+    public static MotorEnc combinedWithEncoder(MotorEnc motorEnc1, MotorEnc motorEnc2) {
+        return combinedWithEncoder(ImmutableList.of(motorEnc1, motorEnc2));
     }
 
     /**
      * combines any number of motors with encoders into one
      *
-     * @param motors the list of motors to combine (all must have encoders)
+     * @param motorEncs the list of motors to combine (all must have encoders)
      * @return the motor that controls all of them (with encoder support)
      */
-    public static MotorEnc combinedWithEncoder(final List<MotorEnc> motors) {
+    public static MotorEnc combinedWithEncoder(final List<MotorEnc> motorEncs) {
         return new MotorEnc() {
             @Override
             public void setSpeed(double speed) {
-                for (MotorEnc motor : motors) motor.setSpeed(speed);
+                for (MotorEnc motorEnc : motorEncs) motorEnc.setSpeed(speed);
             }
 
             @Override
             public void setPosition(int encoderPosition) {
-                for (MotorEnc motor : motors) motor.setPosition(encoderPosition);
+                for (MotorEnc motorEnc : motorEncs) motorEnc.setPosition(encoderPosition);
             }
 
             @Override
             public void resetEncoder() {
-                for (MotorEnc motor : motors) motor.resetEncoder();
+                for (MotorEnc motorEnc : motorEncs) motorEnc.resetEncoder();
             }
 
             @Override
             public int getEncoderPosition() {
                 int total = 0;
-                for (MotorEnc motor : motors) total += motor.getEncoderPosition();
-                if (motors.size() == 0) {
+                for (MotorEnc motorEnc : motorEncs) total += motorEnc.getEncoderPosition();
+                if (motorEncs.size() == 0) {
                     return 0;
                 } else {
-                    return total / motors.size();
+                    return total / motorEncs.size();
                 }
             }
 
             @Override
             public void setPower(double power) {
-                for (MotorEnc motor : motors) motor.setPower(power);
+                for (MotorEnc motorEnc : motorEncs) motorEnc.setPower(power);
             }
 
             @Override
             public MotorMode getMode() {
-                if (motors.size() == 0) {
+                if (motorEncs.size() == 0) {
                     return MotorMode.POWER;
                 } else {
-                    return motors.get(0).getMode();
+                    return motorEncs.get(0).getMode();
                 }
             }
 
             @Override
             public void setStopBehavior(StopBehavior stopBehavior) {
-                for (MotorEnc motor : motors) motor.setStopBehavior(stopBehavior);
+                for (MotorEnc motorEnc : motorEncs) motorEnc.setStopBehavior(stopBehavior);
             }
         };
     }
@@ -146,43 +147,43 @@ public class Motors {
     /**
      * Wrap a DcMotor with no encoder and have it run forwards
      *
-     * @param motor the DcMotor to be wrapped
+     * @param dcMotor the DcMotor to be wrapped
      * @return the Motor wrapper class
      */
-    public static Motor motorWithoutEncoderForward(final DcMotor motor) {
-        return motorWithoutEncoder(motor, false);
+    public static Motor motorWithoutEncoderForward(final DcMotor dcMotor) {
+        return motorWithoutEncoder(dcMotor, false);
     }
 
     /**
      * Wrap a DcMotor with no encoder and have it run backwards
      *
-     * @param motor the DcMotor to be wrapped
+     * @param dcMotor the DcMotor to be wrapped
      * @return the Motor wrapper class
      */
-    public static Motor motorWithoutEncoderReversed(final DcMotor motor) {
-        return motorWithoutEncoder(motor, true);
+    public static Motor motorWithoutEncoderReversed(final DcMotor dcMotor) {
+        return motorWithoutEncoder(dcMotor, true);
     }
 
     /**
      * A basic implementation of the Motor interface
      *
-     * @param motor    the DcMotor to be wrapped
+     * @param dcMotor    the DcMotor to be wrapped
      * @param reversed true if the motor's direction should be reversed
      * @return the Motor wrapper class
      */
-    public static Motor motorWithoutEncoder(final DcMotor motor, boolean reversed) {
+    public static Motor motorWithoutEncoder(final DcMotor dcMotor, boolean reversed) {
         if (reversed) {
-            motor.setDirection(DcMotor.Direction.REVERSE);
+            dcMotor.setDirection(DcMotor.Direction.REVERSE);
         } else {
-            motor.setDirection(DcMotor.Direction.FORWARD);
+            dcMotor.setDirection(DcMotor.Direction.FORWARD);
         }
 
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        dcMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         return new Motor() {
             @Override
             public void setPower(double power) {
-                motor.setPower(Utility.motorLimit(power));
+                dcMotor.setPower(Utility.motorLimit(power));
             }
 
             @Override
@@ -193,9 +194,9 @@ public class Motors {
             @Override
             public void setStopBehavior(StopBehavior stopBehavior) {
                 if (stopBehavior == StopBehavior.BRAKE) {
-                    motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    dcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 } else {
-                    motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    dcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 }
             }
         };
@@ -204,35 +205,35 @@ public class Motors {
     /**
      * Wrap a DcMotor with an encoder and have it run forwards
      *
-     * @param motor the DcMotor to be wrapped
+     * @param dcMotor the DcMotor to be wrapped
      * @return the MotorEnc wrapper class
      */
-    public static MotorEnc motorWithEncoderForward(final DcMotor motor) {
-        return motorWithEncoder(motor, false);
+    public static MotorEnc motorWithEncoderForward(final DcMotor dcMotor) {
+        return motorWithEncoder(dcMotor, false);
     }
 
     /**
      * Wrap a DcMotor with an encoder and have it run backwards
      *
-     * @param motor the DcMotor to be wrapped
+     * @param dcMotor the DcMotor to be wrapped
      * @return the MotorEnc wrapper class
      */
-    public static MotorEnc motorWithEncoderReversed(final DcMotor motor) {
-        return motorWithEncoder(motor, true);
+    public static MotorEnc motorWithEncoderReversed(final DcMotor dcMotor) {
+        return motorWithEncoder(dcMotor, true);
     }
 
     /**
      * A basic implementation of the MotorEnc interface
      *
-     * @param motor    the DcMotor to be wrapped
+     * @param dcMotor    the DcMotor to be wrapped
      * @param reversed true if the motor's direction should be reversed
      * @return the MotorEnc wrapper class
      */
-    public static MotorEnc motorWithEncoder(final DcMotor motor, boolean reversed) {
+    public static MotorEnc motorWithEncoder(final DcMotor dcMotor, boolean reversed) {
         if (reversed) {
-            motor.setDirection(DcMotor.Direction.REVERSE);
+            dcMotor.setDirection(DcMotor.Direction.REVERSE);
         } else {
-            motor.setDirection(DcMotor.Direction.FORWARD);
+            dcMotor.setDirection(DcMotor.Direction.FORWARD);
         }
 
         return new MotorEnc() {
@@ -242,32 +243,32 @@ public class Motors {
             @Override
             public void setPower(double power) {
                 mode = MotorMode.POWER;
-                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motor.setPower(Utility.motorLimit(power));
+                dcMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                dcMotor.setPower(Utility.motorLimit(power));
             }
 
             @Override
             public void setSpeed(double speed) {
                 mode = MotorMode.SPEED;
-                motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                motor.setPower(Utility.motorLimit(speed));
+                dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                dcMotor.setPower(Utility.motorLimit(speed));
             }
 
             @Override
             public void setPosition(int encoderPosition) {
                 mode = MotorMode.POSITION;
-                motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                motor.setTargetPosition(encoderPosition);
+                dcMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                dcMotor.setTargetPosition(encoderPosition);
             }
 
             @Override
             public void resetEncoder() {
-                encoderZero = motor.getCurrentPosition();
+                encoderZero = dcMotor.getCurrentPosition();
             }
 
             @Override
             public int getEncoderPosition() {
-                return motor.getCurrentPosition() - encoderZero;
+                return dcMotor.getCurrentPosition() - encoderZero;
             }
 
             @Override
@@ -278,9 +279,9 @@ public class Motors {
             @Override
             public void setStopBehavior(StopBehavior stopBehavior) {
                 if (stopBehavior == StopBehavior.BRAKE) {
-                    motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    dcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 } else {
-                    motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    dcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 }
             }
         };
@@ -289,40 +290,40 @@ public class Motors {
     /**
      * Wrap a continuous rotation servo as a normal motor and have it run forwards
      *
-     * @param servo the Servo to be wrapped
+     * @param crServo the Servo to be wrapped
      * @return the Motor wrapper class
      */
-    public static Motor continuousServoForward(final Servo servo) {
-        return continuousServo(servo, false);
+    public static Motor continuousServoForward(CRServo crServo) {
+        return continuousServo(crServo, false);
     }
 
     /**
      * Wrap a continuous rotation servo as a normal motor and have it run backwards
      *
-     * @param servo the Servo to be wrapped
+     * @param crServo the Servo to be wrapped
      * @return the Motor wrapper class
      */
-    public static Motor continuousServoReversed(final Servo servo) {
-        return continuousServo(servo, true);
+    public static Motor continuousServoReversed(CRServo crServo) {
+        return continuousServo(crServo, true);
     }
 
     /**
      * Wraps a continuous rotation servo as a normal motor
      *
-     * @param servo    the servo to be wrapped as a motor
+     * @param crServo  the servo to be wrapped as a motor
      * @param reversed true if the servo should be reversed
      * @return the Motor wrapper class
      */
-    public static Motor continuousServo(final Servo servo, boolean reversed) {
+    public static Motor continuousServo(final CRServo crServo, boolean reversed) {
         if (reversed) {
-            servo.setDirection(Servo.Direction.REVERSE);
+            crServo.setDirection(DcMotorSimple.Direction.REVERSE);
         } else {
-            servo.setDirection(Servo.Direction.FORWARD);
+            crServo.setDirection(DcMotorSimple.Direction.FORWARD);
         }
         return new Motor() {
             @Override
             public void setPower(double power) {
-                servo.setPosition(Utility.servoLimit(power * 0.5 + 0.5));
+                crServo.setPower(power);
             }
 
             @Override
