@@ -14,7 +14,7 @@ import static ftc.evlib.driverstation.Telem.telemetry;
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 12/27/15
  * <p>
- * A subclass of FourMotorRobot that contains algorithms for controlling mecanum wheels.
+ * A subclass of FourMotors that contains algorithms for controlling mecanum wheels.
  * It stores the X, Y, and R velocities and sends them to the motors when it is updated.
  */
 public class MecanumMotors extends FourMotors {
