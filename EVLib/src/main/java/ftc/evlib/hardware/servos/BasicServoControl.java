@@ -27,7 +27,7 @@ public class BasicServoControl implements ServoControl {
         this.servo = servo;
         this.name = name;
 
-        OptionsFile optionsFile = OptionsFile.fromFile(FileUtil.getFile(ServoCfg.getServoFilename(name)));
+        OptionsFile optionsFile = new OptionsFile(FileUtil.getFile(ServoCfg.getServoFilename(name)));
 
         presets = new HashMap<>();
 

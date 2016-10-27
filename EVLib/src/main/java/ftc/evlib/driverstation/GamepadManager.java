@@ -80,27 +80,27 @@ public class GamepadManager {
         right_stick_y.update();
 
 
-        /*Hardware.getTelem().addData("a", a.isPressed());
-        Hardware.getTelem().addData("b", b.isPressed());
-        Hardware.getTelem().addData("x", x.isPressed());
-        Hardware.getTelem().addData("y", y.isPressed());
-        Hardware.getTelem().addData("LB", left_bumper.isPressed());
-        Hardware.getTelem().addData("RB", right_bumper.isPressed());
-        Hardware.getTelem().addData("DU", dpad_up.isPressed());
-        Hardware.getTelem().addData("DD", dpad_down.isPressed());
-        Hardware.getTelem().addData("DL", dpad_left.isPressed());
-        Hardware.getTelem().addData("DR", dpad_right.isPressed());
-        Hardware.getTelem().addData("LSB", left_stick_button.isPressed());
-        Hardware.getTelem().addData("RSB", right_stick_button.isPressed());
-        Hardware.getTelem().addData("Back", back.isPressed());
-        Hardware.getTelem().addData("Start", start.isPressed());
+        /*telemetry.addData("a", a.isPressed());
+        telemetry.addData("b", b.isPressed());
+        telemetry.addData("x", x.isPressed());
+        telemetry.addData("y", y.isPressed());
+        telemetry.addData("LB", left_bumper.isPressed());
+        telemetry.addData("RB", right_bumper.isPressed());
+        telemetry.addData("DU", dpad_up.isPressed());
+        telemetry.addData("DD", dpad_down.isPressed());
+        telemetry.addData("DL", dpad_left.isPressed());
+        telemetry.addData("DR", dpad_right.isPressed());
+        telemetry.addData("LSB", left_stick_button.isPressed());
+        telemetry.addData("RSB", right_stick_button.isPressed());
+        telemetry.addData("Back", back.isPressed());
+        telemetry.addData("Start", start.isPressed());
 
-        Hardware.getTelem().addData("Left X", left_stick_x.isPressed());
-        Hardware.getTelem().addData("Left Y", left_stick_y.isPressed());
-        Hardware.getTelem().addData("Right X", right_stick_x.isPressed());
-        Hardware.getTelem().addData("Right Y", right_stick_y.isPressed());
-        Hardware.getTelem().addData("Left Trigger", left_trigger.isPressed());
-        Hardware.getTelem().addData("Right Trigger", right_trigger.isPressed());
+        telemetry.addData("Left X", left_stick_x.isPressed());
+        telemetry.addData("Left Y", left_stick_y.isPressed());
+        telemetry.addData("Right X", right_stick_x.isPressed());
+        telemetry.addData("Right Y", right_stick_y.isPressed());
+        telemetry.addData("Left Trigger", left_trigger.isPressed());
+        telemetry.addData("Right Trigger", right_trigger.isPressed());
         */
     }
 }

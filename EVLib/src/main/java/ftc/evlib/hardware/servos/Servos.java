@@ -60,7 +60,7 @@ public class Servos {
             ServoName servoName = entry.getKey();
             ServoControl servoControl = entry.getValue();
 
-            servoPos.add(servoName.getHardwareName(), String.valueOf(servoControl.getCurrentPosition()));
+            servoPos.add(servoName.getHardwareName(), servoControl.getCurrentPosition());
         }
         //servoPos.add("time", System.currentTimeMillis());
         servoPos.writeToFile(FileUtil.getFile(filename));

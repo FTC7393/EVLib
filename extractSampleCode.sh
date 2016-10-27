@@ -7,6 +7,7 @@ then
 fi
 
 target="$@/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/sample/"
+dest="sample/"
 
 if [ ! -d "$target" ]
 then
@@ -14,7 +15,12 @@ then
 	exit
 fi
 
-rm -r sample
-cp -r "$target" .
+if [ -d "$dest" ]
+then
+	echo "Deleting old $dest directory"
+	rm -r "$dest"
+fi
+echo "copying '$target' to '$dest'"
+cp -r "$target" "$dest"
 # Copy the sample code package to this directory
 
