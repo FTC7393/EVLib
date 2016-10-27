@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import ftc.electronvolts.util.Angle;
 import ftc.electronvolts.util.InputExtractor;
+import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.Vector3D;
 
 import static ftc.evlib.driverstation.Telem.telemetry;
@@ -83,7 +84,7 @@ public class RotationControls {
         final double minAngularSpeed = 0.1;
 
 
-        final Vector3D targetHeadingVector = Vector3D.fromPolar2D(1, targetHeading);
+        final Vector2D targetHeadingVector = new Vector2D(1, targetHeading);
 
         return new RotationControl() {
             private double gyroHeading, rotationCorrection;
@@ -93,10 +94,10 @@ public class RotationControls {
 
                 //get the gyro heading and convert it to a vector
                 gyroHeading = gyro.getHeading();
-                Vector3D gyroVector = Vector3D.fromPolar2D(1, Angle.fromDegrees(gyroHeading));
+                Vector2D gyroVector = new Vector2D(1, Angle.fromDegrees(gyroHeading));
 
                 //find the "signed angular separation", the magnitude and direction of the error
-                double angleRadians = Vector3D.signedAngularSeparation(targetHeadingVector, gyroVector).radians();
+                double angleRadians = Vector2D.signedAngularSeparation(targetHeadingVector, gyroVector).radians();
                 telemetry.addData("signed angular separation", angleRadians);
 
 //              This graph shows angle error vs. rotation correction

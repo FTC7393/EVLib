@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import ftc.electronvolts.statemachine.EndCondition;
 import ftc.electronvolts.statemachine.EndConditions;
 import ftc.electronvolts.util.Angle;
+import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.Vector3D;
 import ftc.evlib.hardware.sensors.AnalogSensor;
 import ftc.evlib.hardware.sensors.ColorSensor;
@@ -177,7 +178,7 @@ public class EVEndConditions extends EndConditions {
      * @return the created EndCondition
      */
     public static EndCondition gyroCloseTo(final GyroSensor gyro, Angle target, final Angle tolerance) {
-        final Vector3D targetVector = Vector3D.fromPolar2D(1, target);
+        final Vector2D targetVector = new Vector2D(1, target);
         return new EndCondition() {
             @Override
             public void init() {
@@ -185,15 +186,15 @@ public class EVEndConditions extends EndConditions {
 
             @Override
             public boolean isDone() {
-                Vector3D gyroVector = Vector3D.fromPolar2D(1, Angle.fromDegrees(gyro.getHeading()));
-                Angle separation = Vector3D.signedAngularSeparation(targetVector, gyroVector);
+                Vector2D gyroVector = new Vector2D(1, Angle.fromDegrees(gyro.getHeading()));
+                Angle separation = Vector2D.signedAngularSeparation(targetVector, gyroVector);
                 return Math.abs(separation.radians()) <= tolerance.radians();
             }
         };
     }
 
     public static EndCondition gyroCloseToRelative(final GyroSensor gyro, double targetDegrees, final double toleranceDegrees) {
-        final Vector3D targetVector = Vector3D.fromPolar2D(1, Angle.fromDegrees(targetDegrees));
+        final Vector2D targetVector = new Vector2D(1, Angle.fromDegrees(targetDegrees));
         return new EndCondition() {
             double gyroInit = 0;
 
@@ -204,8 +205,8 @@ public class EVEndConditions extends EndConditions {
 
             @Override
             public boolean isDone() {
-                Vector3D gyroVector = Vector3D.fromPolar2D(1, Angle.fromDegrees(gyro.getHeading() - gyroInit));
-                Angle separation = Vector3D.signedAngularSeparation(targetVector, gyroVector);
+                Vector2D gyroVector = new Vector2D(1, Angle.fromDegrees(gyro.getHeading() - gyroInit));
+                Angle separation = Vector2D.signedAngularSeparation(targetVector, gyroVector);
                 return Math.abs(separation.degrees()) <= toleranceDegrees;
             }
         };

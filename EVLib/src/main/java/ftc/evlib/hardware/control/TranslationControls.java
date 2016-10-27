@@ -28,7 +28,7 @@ public class TranslationControls {
 
             @Override
             public Vector2D getTranslation() {
-                return Vector2D.fromPolar2D(velocity.getValue(), Angle.fromDegrees(directionDegrees.getValue()));
+                return new Vector2D(velocity.getValue(), Angle.fromDegrees(directionDegrees.getValue()));
             }
 
         };
@@ -155,7 +155,7 @@ public class TranslationControls {
 
             @Override
             public Vector2D getTranslation() {
-                return Vector2D.fromPolar2D(velocity, direction);
+                return new Vector2D(velocity, direction);
             }
 
         };
@@ -205,7 +205,7 @@ public class TranslationControls {
 
             @Override
             public Vector2D getTranslation() {
-                return Vector2D.fromPolar2D(velocity, direction);
+                return new Vector2D(velocity, direction);
             }
 
         };
@@ -237,7 +237,7 @@ public class TranslationControls {
 
             @Override
             public Vector2D getTranslation() {
-                return Vector2D.fromPolar2D(velocity, direction);
+                return new Vector2D(velocity, direction);
             }
 
 
