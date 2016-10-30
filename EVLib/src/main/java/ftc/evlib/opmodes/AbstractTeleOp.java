@@ -18,14 +18,15 @@ public abstract class AbstractTeleOp<Type extends RobotCfg> extends AbstractOp<T
 
     @Override
     public int getMatchTime() {
-//        return 60 * 1000;
         return 2 * 60 * 1000;
     }
 
     @Override
     public void start() {
-        gamepad1.setJoystickDeadzone(.1F);
-        gamepad2.setJoystickDeadzone(.1F);
+        //set the joystick deadzone
+//        gamepad1.setJoystickDeadzone(.1F);
+//        gamepad2.setJoystickDeadzone(.1F);
+
         //store the gamepads
         driver1 = new GamepadManager(gamepad1, getJoystickScalingFunction());
         driver2 = new GamepadManager(gamepad2, getJoystickScalingFunction());

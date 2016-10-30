@@ -6,7 +6,6 @@ import ftc.electronvolts.statemachine.EndCondition;
 import ftc.electronvolts.statemachine.EndConditions;
 import ftc.electronvolts.util.Angle;
 import ftc.electronvolts.util.Vector2D;
-import ftc.electronvolts.util.Vector3D;
 import ftc.evlib.hardware.sensors.AnalogSensor;
 import ftc.evlib.hardware.sensors.ColorSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;

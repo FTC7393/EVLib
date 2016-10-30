@@ -63,7 +63,7 @@ public abstract class AbstractServoTuneOp extends AbstractTeleOp<RobotCfg> {
     }
 
     @Override
-    protected void setup_loop() {
+    protected void setup_act() {
 
     }
 

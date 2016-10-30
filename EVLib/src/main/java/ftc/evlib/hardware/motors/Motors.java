@@ -167,7 +167,7 @@ public class Motors {
     /**
      * A basic implementation of the Motor interface
      *
-     * @param dcMotor    the DcMotor to be wrapped
+     * @param dcMotor  the DcMotor to be wrapped
      * @param reversed true if the motor's direction should be reversed
      * @return the Motor wrapper class
      */
@@ -225,7 +225,7 @@ public class Motors {
     /**
      * A basic implementation of the MotorEnc interface
      *
-     * @param dcMotor    the DcMotor to be wrapped
+     * @param dcMotor  the DcMotor to be wrapped
      * @param reversed true if the motor's direction should be reversed
      * @return the MotorEnc wrapper class
      */

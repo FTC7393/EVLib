@@ -14,15 +14,15 @@ import ftc.evlib.hardware.servos.Servos;
  * adds useful features to the OpMode such as a MatchTimer, servo management, use of HardwareCfg
  */
 public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
-    public MatchTimer matchTimer;
-    public Servos servos;
-    public Type robotCfg;
+    public MatchTimer matchTimer; // keeps track of the time left in the match
+    public Servos servos; // coordinates all the servos to act with one command
+    public Type robotCfg; // stores all the motors, servos, and sensors
 
     protected abstract Type createHardwareCfg();
 
     protected abstract void setup();
 
-    protected abstract void setup_loop();
+    protected abstract void setup_act();
 
     protected abstract void go();
 
@@ -48,7 +48,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
 
     @Override
     public void init_loop() {
-        setup_loop();
+        setup_act();
     }
 
     @Override
