@@ -1,6 +1,6 @@
 package ftc.evlib.hardware.control;
 
-import ftc.electronvolts.util.Angle;
+import ftc.electronvolts.util.units.Angle;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -9,7 +9,7 @@ import ftc.electronvolts.util.Angle;
  * Controls the rotation of a mecanum robot
  */
 public interface RotationControl {
-    double DEFAULT_MAX_ANGULAR_SPEED = 0.5;
+    double DEFAULT_MAX_ANGULAR_SPEED = 0.8; //0.5;
 
     /**
      * update the rotational velocity

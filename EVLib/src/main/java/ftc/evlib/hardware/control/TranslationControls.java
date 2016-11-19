@@ -1,9 +1,13 @@
 package ftc.evlib.hardware.control;
 
-import ftc.electronvolts.util.Angle;
+import ftc.electronvolts.util.ControlLoop;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
+import ftc.electronvolts.util.units.Angle;
+import ftc.electronvolts.util.units.Distance;
+import ftc.evlib.hardware.sensors.DistanceSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;
+import ftc.evlib.hardware.sensors.LineSensorArray;
 import ftc.evlib.vision.framegrabber.FrameGrabber;
 import ftc.evlib.vision.processors.ImageProcessor;
 import ftc.evlib.vision.processors.ImageProcessorResult;
@@ -67,35 +71,65 @@ public class TranslationControls {
         };
     }
 
-//    public static TranslationControlXY polarToXY(final TranslationControlPolar translationControlPolar) {
-//        return new TranslationControlXY() {
-//            double velocityX, velocityY;
-//
-//            @Override
-//            public boolean act() {
-//                boolean worked = translationControlPolar.act();
-//                double velocity = translationControlPolar.getVelocity();
-//                double directionRadians = translationControlPolar.getDirection().getValueRadians();
-//                velocityX = velocity * Math.cos(directionRadians);
-//                velocityY = velocity * Math.sin(directionRadians);
-//                return worked;
-//            }
-//
-//            @Override
-//            public double getVelocityX() {
-//                return velocityX;
-//            }
-//
-//            @Override
-//            public double getVelocityY() {
-//                return velocityY;
-//            }
-//        };
-//    }
+    public static TranslationControl lineFollow(final LineSensorArray lineSensorArray, final LineFollowDirection direction, final double center, final double velocity) {
+        return new TranslationControl() {
+            @Override
+            public boolean act() {
+                lineSensorArray.update();
+                return lineSensorArray.getNumSensorsActive() != 0;
+            }
+
+            @Override
+            public Vector2D getTranslation() {
+                return new Vector2D(center - lineSensorArray.getCenterOfMass(), velocity * direction.sign);
+            }
+        };
+
+    }
+
+    public static TranslationControl lineUp(final LineSensorArray lineSensorArray, final double lineTarget, final ControlLoop lineControl, final DistanceSensor distanceSensor, final Distance distanceTarget, final ControlLoop distanceControl) {
+        lineControl.initialize();
+        distanceControl.initialize();
+        return new TranslationControl() {
+            @Override
+            public boolean act() {
+                lineSensorArray.update();
+                return lineSensorArray.getNumSensorsActive() != 0;
+            }
+
+            @Override
+            public Vector2D getTranslation() {
+                double x = lineControl.computeCorrection(lineTarget, lineSensorArray.getCenterOfMass());
+                double xError = Math.abs(lineTarget - lineSensorArray.getCenterOfMass());
+                double y = 0;
+                if (xError < 3) {
+                    y = distanceControl.computeCorrection(distanceTarget.meters(), distanceSensor.getDistance().meters());
+                }
+                return new Vector2D(x, y);
+            }
+        };
+    }
+
 
     public enum LineFollowDirection {
-        LEFT,
-        RIGHT
+        LEFT(-1),
+        RIGHT(1);
+
+        public final int sign;
+        public final Angle angle;
+
+        LineFollowDirection(int sign) {
+            this.sign = sign;
+            this.angle = Angle.fromDegrees(90 * sign);
+        }
+
+        public LineFollowDirection opposite() {
+            if (this == LEFT) {
+                return RIGHT;
+            } else {
+                return LEFT;
+            }
+        }
     }
 
     /**
@@ -122,13 +156,7 @@ public class TranslationControls {
              */
             @Override
             public boolean act() {
-                double targetDirection;
-                if (lineFollowDirection == LineFollowDirection.LEFT) {
-                    targetDirection = -90;
-                } else {
-                    targetDirection = 90;
-                }
-
+                double targetDirection = 90 * lineFollowDirection.sign;
                 DoubleLineSensor.LinePosition linePosition = doubleLineSensor.getPosition();
 
                 //calculate the correction based on the line position

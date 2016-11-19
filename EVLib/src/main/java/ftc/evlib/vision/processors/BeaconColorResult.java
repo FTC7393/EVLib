@@ -2,15 +2,19 @@ package ftc.evlib.vision.processors;
 
 import org.opencv.core.Scalar;
 
+import ftc.electronvolts.util.TeamColor;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * Storage class for the position and color of the beacon
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/17/16.
+ *
+ * Storage class for the color of the beacon
  */
 public class BeaconColorResult {
-
+    /**
+     * Storage class for the color of one beacon
+     */
     public enum BeaconColor {
         RED(ImageUtil.RED, "R"),
         GREEN(ImageUtil.GREEN, "G"),
@@ -23,6 +27,47 @@ public class BeaconColorResult {
         BeaconColor(Scalar scalar, String letter) {
             this.color = scalar;
             this.letter = letter;
+        }
+
+        /**
+         * Converts a TeamColor to a BeaconColor
+         *
+         * @param teamColor the TeamColor to convert
+         * @return the corresponding BeaconColor
+         */
+        public static BeaconColor fromTeamColor(TeamColor teamColor) {
+            switch (teamColor) {
+                case RED:
+                    return RED;
+                case BLUE:
+                    return BLUE;
+                default:
+                    return UNKNOWN;
+            }
+        }
+
+        /**
+         * @return the TeamColor corresponding to this BeaconColor
+         */
+        public BeaconColor toTeamColor() {
+            return toTeamColor(this);
+        }
+
+        /**
+         * Converts a BeaconColor to a TeamColor
+         *
+         * @param beaconColor the BeaconColor to convert
+         * @return the corresponding TeamColor
+         */
+        public static BeaconColor toTeamColor(BeaconColor beaconColor) {
+            switch (beaconColor) {
+                case RED:
+                    return RED;
+                case BLUE:
+                    return BLUE;
+                default:
+                    return UNKNOWN;
+            }
         }
     }
 

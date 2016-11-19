@@ -16,6 +16,9 @@ public class CalibratedLineSensor implements DigitalSensor {
     private boolean seeingLine = false;
     private double value;
 
+    /**
+     * @param lineSensor the raw line sensor
+     */
     public CalibratedLineSensor(AnalogSensor lineSensor) {
         this.lineSensor = lineSensor;
     }
@@ -73,6 +76,9 @@ public class CalibratedLineSensor implements DigitalSensor {
         seeingLine = value < threshold;
     }
 
+    /**
+     * @return the raw value of the line sensor
+     */
     public double getRawValue() {
         return value;
     }

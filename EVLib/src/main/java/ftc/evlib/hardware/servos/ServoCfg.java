@@ -55,7 +55,7 @@ public class ServoCfg {
             Servo servo = hardwareMap.servo.get(servoName.getHardwareName());
 
             //create a ServoControl from that servo
-            ServoControl servoControl = new BasicServoControl(servo, servoName, preset);
+            ServoControl servoControl = new ServoControl(servo, servoName, preset);
             servoMap.put(servoName, servoControl); //add it to the map
         }
 

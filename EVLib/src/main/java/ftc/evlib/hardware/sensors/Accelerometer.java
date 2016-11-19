@@ -19,10 +19,18 @@ public class Accelerometer implements SensorEventListener {
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
+    /**
+     * @return true if the sensor has gotten its first reading
+     */
     public boolean isReady() {
         return ready;
     }
 
+    /**
+     * This is called when the phone gets a sensor update
+     *
+     * @param sensorEvent the event with the accelerometer data
+     */
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         //if there was an accelerometer event, store the values
@@ -34,14 +42,23 @@ public class Accelerometer implements SensorEventListener {
         }
     }
 
+    /**
+     * @return the accelerometer x value
+     */
     public double getX() {
         return x;
     }
 
+    /**
+     * @return the accelerometer y value
+     */
     public double getY() {
         return y;
     }
 
+    /**
+     * @return the accelerometer z value
+     */
     public double getZ() {
         return z;
     }

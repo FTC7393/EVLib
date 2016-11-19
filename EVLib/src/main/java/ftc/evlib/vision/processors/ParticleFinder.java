@@ -20,13 +20,14 @@ import ftc.evlib.vision.ImageUtil;
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/26/16
+ *
+ * An ImageProcessor that finds particles (field object)
  */
-
 public class ParticleFinder implements ImageProcessor<Particle> {
     public static final String TAG = "ParticleFinder";
     private static final int THICKNESS = 2;
-    private static Scalar[] colorChannels = {ImageUtil.RED, ImageUtil.GREEN, ImageUtil.BLUE};
-    private static String[] colorNames = {"red", "green", "blue"};
+    private static final Scalar[] colorChannels = {ImageUtil.RED, ImageUtil.GREEN, ImageUtil.BLUE};
+//    private static String[] colorNames = {"red", "green", "blue"};
 
     private static final int BLUR_AMOUNT = 3; //used to blur the binary image
     private static final int BLUR_MAX_V = 80; //post-blur hsv value threshold

@@ -24,6 +24,9 @@ public class AveragedSensor implements AnalogSensor {
         readings = new double[numReadings];
     }
 
+    /**
+     * @return true once the first numReadings have been read
+     */
     public boolean isReady() {
         return ready;
     }

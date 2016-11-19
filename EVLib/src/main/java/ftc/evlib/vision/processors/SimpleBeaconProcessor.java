@@ -14,12 +14,29 @@ import java.util.List;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * Created by vandejd1 on 8/29/16.
- * FTC Team EV 7393
+ * This file was made by the electronVolts, FTC team 7393
+ * Date Created: 8/29/16
+ *
+ * Assumes the beacon is centered in the image and finds the color (red, green, or blue)
  */
 public class SimpleBeaconProcessor implements ImageProcessor<BeaconColorResult> {
     private static final String TAG = "SimpleBeaconProcessor";
     private static final double MIN_MASS = 6; //minimum mass for column sum
+
+    private static final int DEFAULT_MIN_S = 50;
+    private static final int DEFAULT_MIN_V = 150;
+
+    private final int minS, minV;
+
+    public SimpleBeaconProcessor() {
+        minS = DEFAULT_MIN_S;
+        minV = DEFAULT_MIN_V;
+    }
+
+    public SimpleBeaconProcessor(int minS, int minV) {
+        this.minS = minS;
+        this.minV = minV;
+    }
 
     /**
      * Convert to hsv
@@ -50,13 +67,13 @@ public class SimpleBeaconProcessor implements ImageProcessor<BeaconColorResult> 
         List<Scalar> thresholdMin = new ArrayList<>();
         List<Scalar> thresholdMax = new ArrayList<>();
 
-        thresholdMin.add(new Scalar((300) / 2, 50, 150));
+        thresholdMin.add(new Scalar((300) / 2, minS, minV));
         thresholdMax.add(new Scalar((60) / 2, 255, 255));
 
-        thresholdMin.add(new Scalar((60) / 2, 50, 150));
+        thresholdMin.add(new Scalar((60) / 2, minS, minV));
         thresholdMax.add(new Scalar((180) / 2, 255, 255));
 
-        thresholdMin.add(new Scalar((180) / 2, 50, 150));
+        thresholdMin.add(new Scalar((180) / 2, minS, minV));
         thresholdMax.add(new Scalar((300) / 2, 255, 255));
 
         //make a list of channels that are blank (used for combining binary images)

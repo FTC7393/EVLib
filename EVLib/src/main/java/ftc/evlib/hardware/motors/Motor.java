@@ -9,6 +9,23 @@ package ftc.evlib.hardware.motors;
  */
 public interface Motor {
     /**
+     * The different modes the motor can be in
+     */
+    enum MotorMode {
+        POWER, //directly control the power
+        SPEED, //enable a feedback loop to correct speed (requires encoders)
+        POSITION //turn the motor towards a certain encoder position (required encoders)
+    }
+
+    /**
+     * What to do when the motor is stopped
+     */
+    enum StopBehavior {
+        BRAKE, //keep the motor from turning further
+        FLOAT //let the motor turn freely
+    }
+
+    /**
      * Control the motor's raw voltage
      *
      * @param power value to set the power to
@@ -28,15 +45,4 @@ public interface Motor {
      * @param stopBehavior what to do when the motor is stopped
      */
     void setStopBehavior(StopBehavior stopBehavior);
-
-    enum MotorMode {
-        POWER,
-        SPEED,
-        POSITION
-    }
-
-    enum StopBehavior {
-        BRAKE,
-        FLOAT
-    }
 }

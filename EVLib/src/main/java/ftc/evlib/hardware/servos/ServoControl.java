@@ -1,34 +1,84 @@
 package ftc.evlib.hardware.servos;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
+import java.util.HashMap;
 import java.util.Map;
+
+import ftc.electronvolts.util.OptionsFile;
+import ftc.evlib.util.FileUtil;
+
+import static ftc.evlib.driverstation.Telem.telemetry;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/12/16
- * <p>
- * defines the interface for controlling the speed of a servo and using presets
+ *
+ * Controls the speed of a servo and stores preset values in a file
  */
-public interface ServoControl {
-    double MAX_SPEED = 10000000;
+public class ServoControl {
+    /**
+     * The speed to set the servo to if you want it to move as fast as possible
+     */
+    public static final double MAX_SPEED = 1e10;
+
+    private static final int MAX_DELTA_TIME_MILLIS = 50;
+    private final Servo servo;
+    private long lastTime;
+    private double currentPosition, targetPosition, speed;
+    private final ServoName name;
+    private final Map<Enum, Double> presets;
+    private boolean done = false;
+
+    /**
+     * Create a ServoControl to wrap a Servo
+     *
+     * @param servo       the servo to control
+     * @param name        the name of the servo (also contains servo info)
+     * @param startPreset the preset to start at
+     */
+    public ServoControl(Servo servo, ServoName name, Enum startPreset) {
+        this.servo = servo;
+        this.name = name;
+
+        OptionsFile optionsFile = new OptionsFile(FileUtil.getFile(ServoCfg.getServoFilename(name)));
+
+        presets = new HashMap<>();
+
+        for (Enum preset : name.getPresets()) {
+
+            double servoPosition = 0.5;
+            try {
+                servoPosition = optionsFile.getAsDouble(preset.name(), servoPosition);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+            presets.put(preset, servoPosition);
+        }
+        targetPosition = presets.get(startPreset);
+        currentPosition = targetPosition;
+
+        servo.setPosition(targetPosition);
+        speed = MAX_SPEED;
+    }
 
     /**
      * @return the map of presets and their corresponding values
      */
-    Map<Enum, Double> getPresets();
-
-    /**
-     * go using the position and speed stored in a servoCommand
-     *
-     * @param servoCommand the position and speed
-     */
-    void go(ServoCommand servoCommand);
+    public Map<Enum, Double> getPresets() {
+        return presets;
+    }
 
     /**
      * go to a preset at maximum speed
      *
      * @param preset the preset to go to
      */
-    void goToPreset(Enum preset);
+    public void goToPreset(Enum preset) {
+        this.targetPosition = presets.get(preset);
+        this.speed = MAX_SPEED;
+        done = false;
+    }
 
     /**
      * go to a preset at any speed
@@ -36,14 +86,22 @@ public interface ServoControl {
      * @param preset the preset to go to
      * @param speed  the speed to go at
      */
-    void goToPreset(Enum preset, double speed);
+    public void goToPreset(Enum preset, double speed) {
+        this.targetPosition = presets.get(preset);
+        this.speed = speed;
+        done = false;
+    }
 
     /**
      * go to a position at max speed
      *
      * @param position the position to go to
      */
-    void setPosition(double position);
+    public void setPosition(double position) {
+        this.targetPosition = position;
+        this.speed = MAX_SPEED;
+        done = false;
+    }
 
     /**
      * go to a position at any speed
@@ -51,27 +109,63 @@ public interface ServoControl {
      * @param position the position to go to
      * @param speed    the speed to go at
      */
-    void setPosition(double position, double speed);
+    public void setPosition(double position, double speed) {
+        this.targetPosition = position;
+        this.speed = speed;
+        done = false;
+    }
 
     /**
-     * @return the current position
+     * @return the current position of the servo
      */
-    double getCurrentPosition();
+    public double getCurrentPosition() {
+        return currentPosition;
+    }
 
     /**
      * update the servo's position based on the speed
      *
      * @return whether or not the servo's movement is completed
      */
-    boolean act();
+    public boolean act() {
+        long now = System.currentTimeMillis(); //record the current time
+        long deltaTime = now - lastTime; //calculate the time since the last update
+        if (deltaTime > MAX_DELTA_TIME_MILLIS) {
+            deltaTime = MAX_DELTA_TIME_MILLIS; //limit the delta time
+        }
+
+        //record telemetry
+        telemetry.addData("ServoControl " + name + " deltaTime", deltaTime);
+        telemetry.addData("ServoControl " + name + " targetPosition", targetPosition);
+
+        double positionError = targetPosition - currentPosition; //calculate the distance left to go
+        double increment = speed * deltaTime / 1000.0; //calculate the amount to increment
+
+        done = Math.abs(positionError) <= increment; //determine if the increment would meet or exceed the target
+
+        if (done) {
+            currentPosition = targetPosition; //if so, go to the target
+        } else {
+            currentPosition += Math.signum(positionError) * increment; //otherwise, increment the position
+        }
+
+        servo.setPosition(currentPosition); //set the servo to the position
+        lastTime = now;
+        return done;
+    }
 
     /**
      * @return whether or not the servo's movement is completed
      */
-    boolean isDone();
+    public boolean isDone() {
+        return done;
+    }
 
     /**
      * @return the name of the servo
+     * @see ServoName
      */
-    ServoName getName();
+    public ServoName getName() {
+        return name;
+    }
 }

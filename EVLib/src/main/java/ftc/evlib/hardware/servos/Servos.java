@@ -66,6 +66,9 @@ public class Servos {
         servoPos.writeToFile(FileUtil.getFile(filename));
     }
 
+    /**
+     * @return a Map that links the names of the servos to the servos
+     */
     public Map<ServoName, ServoControl> getServoMap() {
         return servoMap;
     }

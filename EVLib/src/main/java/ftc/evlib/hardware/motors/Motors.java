@@ -339,7 +339,7 @@ public class Motors {
     }
 
     /**
-     * @return a motor that does nothing
+     * @return a motor with an encoder that does nothing
      */
     public static MotorEnc dummyMotorEnc() {
         return new MotorEnc() {
@@ -404,18 +404,39 @@ public class Motors {
         };
     }
 
+    /**
+     * Simulate a NeveRest20 with an encoder
+     *
+     * @return the simulated motor
+     */
     public static MotorEnc simulatedNeveRest20() {
         return simulatedNeveRest(20);
     }
 
+    /**
+     * Simulate a NeveRest40 with an encoder
+     *
+     * @return the simulated motor
+     */
     public static MotorEnc simulatedNeveRest40() {
         return simulatedNeveRest(40);
     }
 
+    /**
+     * Simulate a NeveRest60 with an encoder
+     *
+     * @return the simulated motor
+     */
     public static MotorEnc simulatedNeveRest60() {
         return simulatedNeveRest(60);
     }
 
+    /**
+     * Simulate a NeveRest motor of any gear ratio with an encoder
+     *
+     * @param gearRatio the gear ratio of the motor
+     * @return the simulated motor
+     */
     public static MotorEnc simulatedNeveRest(double gearRatio) {
         return simulatedMotor(6400 / gearRatio, 7 * gearRatio);
     }

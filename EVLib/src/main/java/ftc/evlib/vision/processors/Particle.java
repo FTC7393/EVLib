@@ -11,8 +11,9 @@ import ftc.evlib.vision.ImageUtil;
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/26/16
+ *
+ * A particle (field object) that can be tracked
  */
-
 public class Particle implements Location, Comparable<Particle> {
     public enum ParticleColor {
         RED(ImageUtil.RED),

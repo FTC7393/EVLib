@@ -11,9 +11,11 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  * used to manage the frames that openCV takes
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/24/16.
+ *
+ * This initializes opencv and feeds frames to the FrameGrabber
  */
 public class OpenCVFrameGrabberInit implements CameraBridgeViewBase.CvCameraViewListener2 {
-    private static final String TAG = "OpenCVFrameGrabber";
+    private static final String TAG = "OpenCVFrameGrabberInit";
     private final FrameGrabber.CameraOrientation cameraOrientation;
     private final boolean ignoreOrientationForDisplay;
 
@@ -41,9 +43,15 @@ public class OpenCVFrameGrabberInit implements CameraBridgeViewBase.CvCameraView
         cameraBridgeViewBase.setCvCameraViewListener(this);
     }
 
+    /**
+     * When the opencv camera view starts, initialize the frame grabber
+     *
+     * @param width  the width of the frames that will be delivered
+     * @param height the height of the frames that will be delivered
+     */
     @Override
     public void onCameraViewStarted(int width, int height) {
-        new RealFrameGrabber(TAG, width, height, cameraOrientation, ignoreOrientationForDisplay);
+        new RealFrameGrabber(TAG, width, height, cameraOrientation, ignoreOrientationForDisplay, false);
     }
 
     @Override
@@ -51,6 +59,12 @@ public class OpenCVFrameGrabberInit implements CameraBridgeViewBase.CvCameraView
 
     }
 
+    /**
+     * Receive a frame from opencv
+     *
+     * @param inputFrame the received frame
+     * @return the frame to be displayed on the phone screen
+     */
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         return frameGrabber.receiveFrame(inputFrame.rgba());

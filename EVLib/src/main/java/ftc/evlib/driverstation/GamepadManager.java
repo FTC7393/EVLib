@@ -11,22 +11,29 @@ import ftc.electronvolts.util.Functions;
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 1/9/16
  * <p>
- * Manages edge detection on all the gamepad inputs
+ * This class wraps a gamepad and adds:
+ * Edge detection to the digital inputs (buttons and dpad)
+ * Scaling to the analog inputs (joysticks and triggers)
  */
 public class GamepadManager {
+    //this stores all the wrapped digital inputs
     public final DigitalInputEdgeDetector a, b, x, y, left_bumper, right_bumper,
             dpad_up, dpad_down, dpad_left, dpad_right,
             left_stick_button, right_stick_button, back, start;
 
+    //this stores all the wrapped analog inputs
     public final AnalogInputScaler left_stick_x, left_stick_y, right_stick_x, right_stick_y,
             left_trigger, right_trigger;
 
 
+    //use this constructor for no joystick scaling
     public GamepadManager(Gamepad gamepad) {
         this(gamepad, Functions.none());
     }
 
-    public GamepadManager(Gamepad gamepad, Function inputScaler) {
+    //use this constructor for custom joystick scaling
+    public GamepadManager(Gamepad gamepad, Function scalingFunction) {
+        //create all the DigitalInputEdgeDetector objects
         a = new DigitalInputEdgeDetector(GamepadIEFactory.a(gamepad));
         b = new DigitalInputEdgeDetector(GamepadIEFactory.b(gamepad));
         x = new DigitalInputEdgeDetector(GamepadIEFactory.x(gamepad));
@@ -42,15 +49,17 @@ public class GamepadManager {
         back = new DigitalInputEdgeDetector(GamepadIEFactory.back(gamepad));
         start = new DigitalInputEdgeDetector(GamepadIEFactory.start(gamepad));
 
-        left_stick_x = new AnalogInputScaler(GamepadIEFactory.left_stick_x(gamepad), inputScaler);
-        left_stick_y = new AnalogInputScaler(GamepadIEFactory.left_stick_y(gamepad), inputScaler);
-        right_stick_x = new AnalogInputScaler(GamepadIEFactory.right_stick_x(gamepad), inputScaler);
-        right_stick_y = new AnalogInputScaler(GamepadIEFactory.right_stick_y(gamepad), inputScaler);
-        left_trigger = new AnalogInputScaler(GamepadIEFactory.left_trigger(gamepad), inputScaler);
-        right_trigger = new AnalogInputScaler(GamepadIEFactory.right_trigger(gamepad), inputScaler);
+        //create all the AnalogInputScaler objects
+        left_stick_x = new AnalogInputScaler(GamepadIEFactory.left_stick_x(gamepad), scalingFunction);
+        left_stick_y = new AnalogInputScaler(GamepadIEFactory.left_stick_y(gamepad), scalingFunction);
+        right_stick_x = new AnalogInputScaler(GamepadIEFactory.right_stick_x(gamepad), scalingFunction);
+        right_stick_y = new AnalogInputScaler(GamepadIEFactory.right_stick_y(gamepad), scalingFunction);
+        left_trigger = new AnalogInputScaler(GamepadIEFactory.left_trigger(gamepad), scalingFunction);
+        right_trigger = new AnalogInputScaler(GamepadIEFactory.right_trigger(gamepad), scalingFunction);
     }
 
     public void update() {
+        //update all the values
         a.update();
         b.update();
         x.update();

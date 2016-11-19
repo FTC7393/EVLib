@@ -9,8 +9,10 @@ import org.opencv.core.RotatedRect;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * Created by vandejd1 on 8/31/16.
- * FTC Team EV 7393
+ * This file was made by the electronVolts, FTC team 7393
+ * Date Created: 8/31/16
+ *
+ * A circle with a point and a radius
  */
 public class Circle implements Comparable<Circle> {
     public final RotatedRect ellipse;
@@ -18,6 +20,10 @@ public class Circle implements Comparable<Circle> {
     public final Point p;
     public final double area, ratio;
 
+    /**
+     * Create a Circle from an ellipse
+     * @param ellipse the ellipse as a RotatedRect object
+     */
     public Circle(RotatedRect ellipse) {
         this.ellipse = ellipse;
         this.c = ellipse.boundingRect();
@@ -35,6 +41,11 @@ public class Circle implements Comparable<Circle> {
 
     }
 
+    /**
+     * Compare circles by area
+     * @param another the other circle
+     * @return an integer that represents the comparison result
+     */
     @Override
     public int compareTo(@NonNull Circle another) {
         return Double.compare(another.area, this.area);

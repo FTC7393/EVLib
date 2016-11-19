@@ -21,8 +21,11 @@ import java.util.List;
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/25/16.
+ *
+ * Useful utility methods for image processing
  */
 public class ImageUtil {
+    //standatrd colors
     public static final Scalar WHITE = new Scalar(255, 255, 255);
     public static final Scalar GRAY = new Scalar(128, 128, 128);
     public static final Scalar BLACK = new Scalar(0, 0, 0);
@@ -139,7 +142,7 @@ public class ImageUtil {
     }
 
     /**
-     * Applys the Core.inRange function to a Mat after accounting for rollover
+     * Applies the Core.inRange function to a Mat after accounting for rollover
      * on the hsv hue channel.
      *
      * @param srcHSV source Mat in HSV format

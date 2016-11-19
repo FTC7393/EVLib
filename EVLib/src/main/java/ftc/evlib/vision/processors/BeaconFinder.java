@@ -20,8 +20,10 @@ import ftc.evlib.util.StepTimer;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * Created by vandejd1 on 8/30/16.
- * FTC Team EV 7393
+ * This file was made by the electronVolts, FTC team 7393
+ * Date Created: 8/30/16
+ *
+ * Finds only the position of the beacon in the field of view
  */
 public class BeaconFinder implements ImageProcessor<BeaconPositionResult> {
     private static final String TAG = "BeaconFinder";
@@ -44,6 +46,9 @@ public class BeaconFinder implements ImageProcessor<BeaconPositionResult> {
 //  private static final Scalar HSV_MAX = new Scalar(179, 255, 255);
 //  private static final double MIN_MASS = 6; //minimum mass for column sum
 
+    /**
+     * Timer to log the time each step takes
+     */
     private final StepTimer stepTimer = new StepTimer(TAG);
 
     @Override

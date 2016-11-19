@@ -20,40 +20,63 @@ public class ColorSensor implements DigitalSensor {
     private final AveragedSensor lightSensor;
     private String ledColorString = "unknown";
 
+    /**
+     * @param redLight    the red LED
+     * @param blueLight   the blue LED
+     * @param lightSensor the photoresistor
+     */
     public ColorSensor(LED redLight, LED blueLight, AveragedSensor lightSensor) {
         this.redLight = redLight;
         this.blueLight = blueLight;
         this.lightSensor = lightSensor;
     }
 
+    /**
+     * turn off both LEDs
+     */
     public void turnOff() {
         redLight.enable(true);
         blueLight.enable(true);
         ledColorString = "blank";
     }
 
+    /**
+     * turn on the red LED and turn off the blue LED
+     */
     public void setColorRed() {
         redLight.enable(false);
         blueLight.enable(true);
         ledColorString = "red";
     }
 
+    /**
+     * turn on the blue LED and turn off the red LED
+     */
     public void setColorBlue() {
         redLight.enable(true);
         blueLight.enable(false);
         ledColorString = "blue";
     }
 
+    /**
+     * turn on both LEDs
+     */
     public void setColorMagenta() {
         redLight.enable(false);
         blueLight.enable(false);
         ledColorString = "magenta";
     }
 
+    /**
+     * @return the name of the current color for telemetry purposes
+     */
     public String getLedColorString() {
         return ledColorString;
     }
 
+    /**
+     * update the light sensor
+     */
     public void act() {
         lightSensor.act();
     }
@@ -66,6 +89,9 @@ public class ColorSensor implements DigitalSensor {
         return lightSensor.getValue() > THRESHOLD;
     }
 
+    /**
+     * @return the raw value of the light sensor
+     */
     public double getRawValue() {
         return lightSensor.getValue();
     }

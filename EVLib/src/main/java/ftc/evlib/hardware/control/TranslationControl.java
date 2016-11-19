@@ -16,5 +16,8 @@ public interface TranslationControl {
      */
     boolean act();
 
+    /**
+     * @return the translational velocity
+     */
     Vector2D getTranslation();
 }

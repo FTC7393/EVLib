@@ -8,5 +8,13 @@ import org.opencv.core.Mat;
  * Date Created: 8/17/16.
  */
 public interface ImageProcessor<ResultType> {
+    /**
+     * Process a camera frame
+     *
+     * @param startTime the time the frame was taken
+     * @param rgbaFrame the frame
+     * @param saveImages whether or not ot save the images for logging
+     * @return the modified frame to display on the phone screen
+     */
     ImageProcessorResult<ResultType> process(long startTime, Mat rgbaFrame, boolean saveImages);
 }

@@ -6,17 +6,19 @@ import org.opencv.imgproc.Imgproc;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * Created by vandejd1 on 8/28/16.
- * FTC Team EV 7393
+ * This file was made by the electronVolts, FTC team 7393
+ * Date Created: 8/28/16
+ *
+ * An image processor that saves the image if requested and returns a status String
  */
 public class DummyImageProcessor implements ImageProcessor<String> {
     private static final String TAG = "DummyImageProcessor";
 
     @Override
     public ImageProcessorResult<String> process(long startTime, Mat rgbaFrame, boolean saveImages) {
-        //save the image in the Pictures directory
         String result = "Displayed the image.";
         if (saveImages) {
+            //save the camera frame in the Pictures directory
             if (ImageUtil.saveImage(TAG, rgbaFrame, Imgproc.COLOR_RGBA2BGR, "camera", startTime)) {
                 result = "Saved and Displayed the image.";
             } else {

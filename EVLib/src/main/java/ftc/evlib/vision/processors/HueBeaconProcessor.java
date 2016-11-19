@@ -11,9 +11,10 @@ import ftc.evlib.util.StepTimer;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * Similar to RGBBeaconProcessor, but uses 0 to 179 as the color instead of RGB
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/29/16.
+ *
+ * Similar to RGBBeaconProcessor, but uses 0 to 179 as the color instead of RGB
  */
 public class HueBeaconProcessor implements ImageProcessor<BeaconResult> {
     private static final String TAG = "HueBeaconProcessor";

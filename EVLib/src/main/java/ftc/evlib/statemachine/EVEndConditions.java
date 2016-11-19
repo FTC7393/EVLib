@@ -4,12 +4,15 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import ftc.electronvolts.statemachine.EndCondition;
 import ftc.electronvolts.statemachine.EndConditions;
-import ftc.electronvolts.util.Angle;
 import ftc.electronvolts.util.Vector2D;
+import ftc.electronvolts.util.units.Angle;
+import ftc.electronvolts.util.units.Distance;
 import ftc.evlib.hardware.sensors.AnalogSensor;
 import ftc.evlib.hardware.sensors.ColorSensor;
+import ftc.evlib.hardware.sensors.DistanceSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;
 import ftc.evlib.hardware.sensors.LineFinder;
+import ftc.evlib.hardware.sensors.LineSensorArray;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -192,8 +195,16 @@ public class EVEndConditions extends EndConditions {
         };
     }
 
-    public static EndCondition gyroCloseToRelative(final GyroSensor gyro, double targetDegrees, final double toleranceDegrees) {
-        final Vector2D targetVector = new Vector2D(1, Angle.fromDegrees(targetDegrees));
+    /**
+     * wait until the gyro heading is close to a target value relative to the starting heading
+     *
+     * @param gyro      the gyro sensor
+     * @param target    the target value relative to the starting heading
+     * @param tolerance the accepted tolerance to be considered "close to"
+     * @return the created State
+     */
+    public static EndCondition gyroCloseToRelative(final GyroSensor gyro, Angle target, final Angle tolerance) {
+        final Vector2D targetVector = new Vector2D(1, target);
         return new EndCondition() {
             double gyroInit = 0;
 
@@ -206,7 +217,7 @@ public class EVEndConditions extends EndConditions {
             public boolean isDone() {
                 Vector2D gyroVector = new Vector2D(1, Angle.fromDegrees(gyro.getHeading() - gyroInit));
                 Angle separation = Vector2D.signedAngularSeparation(targetVector, gyroVector);
-                return Math.abs(separation.degrees()) <= toleranceDegrees;
+                return Math.abs(separation.degrees()) <= tolerance.degrees();
             }
         };
     }
@@ -251,4 +262,70 @@ public class EVEndConditions extends EndConditions {
         };
     }
 
+    /**
+     * Wait for any sensor to activate on a line sensor array
+     *
+     * @param lineSensorArray the sensor
+     * @return the created State
+     */
+    public static EndCondition lineSensorArrayAny(final LineSensorArray lineSensorArray) {
+        return new EndCondition() {
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return lineSensorArray.getNumSensorsActive() > 0;
+            }
+        };
+    }
+
+    /**
+     * Wait for a distance sensor to cross a threshold
+     *
+     * @param distanceSensor the distance sensor
+     * @param target         the target value
+     * @param greater        whether to wait for the sensor to be greater or less than the target
+     * @return the created State
+     */
+    public static EndCondition distanceSensor(final DistanceSensor distanceSensor, final Distance target, final boolean greater) {
+        return new EndCondition() {
+            @Override
+            public void init() {
+            }
+
+            @Override
+            public boolean isDone() {
+                if (greater) {
+                    return (distanceSensor.getDistance().meters() >= target.meters());
+                } else {
+                    return (distanceSensor.getDistance().meters() <= target.meters());
+                }
+            }
+        };
+    }
+
+    /**
+     * Wait for a distance sensor to be less than a certain distance
+     *
+     * @param distanceSensor the distanc sensor
+     * @param target         the target Distance
+     * @return the created State
+     */
+    public static EndCondition distanceSensorLess(DistanceSensor distanceSensor, Distance target) {
+        return distanceSensor(distanceSensor, target, false);
+    }
+
+    /**
+     * Wait for a distance sensor to be greater than a certain distance
+     *
+     * @param distanceSensor the distanc sensor
+     * @param target         the target Distance
+     * @return the created State
+     */
+    public static EndCondition distanceSensorGreater(DistanceSensor distanceSensor, Distance target) {
+        return distanceSensor(distanceSensor, target, true);
+    }
 }

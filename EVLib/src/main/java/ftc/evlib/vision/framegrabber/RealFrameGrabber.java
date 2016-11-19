@@ -15,39 +15,79 @@ import ftc.evlib.vision.ImageUtil;
 import ftc.evlib.vision.processors.ImageProcessor;
 import ftc.evlib.vision.processors.ImageProcessorResult;
 
+import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
+
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 10/7/16
+ *
+ * This implements FrameGrabber and uses opencv methods
  */
-
 public class RealFrameGrabber implements FrameGrabber {
     private FrameGrabberMode mode = FrameGrabberMode.STOPPED;
 
     private CameraOrientation cameraOrientation;
     private boolean ignoreOrientationForDisplay, saveImages;
+    private final boolean throwAway;
 
-    //the frame, the blank frame, and temporary images to flip the frame
-    private Mat frame, blank, tmp1, tmp2;
+    /**
+     * The camera frame
+     */
+    private Mat frame;
 
-    //logging tag
+    /**
+     * A completely black image
+     */
+    private final Mat blank;
+
+    /**
+     * temporary images used for flipping
+     */
+    private final Mat tmp1, tmp2;
+
+    /**
+     * logging tag
+     */
     private final String tag;
 
     private boolean resultReady = false;
 
-    //objects to run and store the result
+    /**
+     * The ImageProcessor to run
+     */
     private ImageProcessor imageProcessor = null;
+
+    /**
+     * The object to store the result from the ImagezProcessor
+     */
     private ImageProcessorResult result = null;
 
-    //timing variables
+    /**
+     * timing variables
+     */
     private long totalTime = 0, loopCount = 0, loopTimer = 0;
 
+    /**
+     * StepTimer to keep track of the different steps in each loop
+     */
     private final StepTimer stepTimer;
 
-
-    public RealFrameGrabber(String tag, int width, int height, CameraOrientation cameraOrientation, boolean ignoreOrientationForDisplay) {
+    /**
+     * Create a FrameGrabber
+     *
+     * @param tag the logging tag
+     * @param width the width of the camera frames it will get
+     * @param height the height of the camera frames it will get
+     * @param cameraOrientation the orientation of the camera on the robot
+     * @param ignoreOrientationForDisplay whether or not to flip the output frame when displaying
+     * @param throwAway whether or not to throw away frames instead of stopping
+     */
+    public RealFrameGrabber(String tag, int width, int height, CameraOrientation cameraOrientation, boolean ignoreOrientationForDisplay, boolean throwAway) {
         this.cameraOrientation = cameraOrientation;
         this.ignoreOrientationForDisplay = ignoreOrientationForDisplay;
         this.tag = tag;
+        this.throwAway = throwAway;
+
         stepTimer = new StepTimer(tag);
 
         //create the frame and tmp images
@@ -55,7 +95,12 @@ public class RealFrameGrabber implements FrameGrabber {
         blank = new Mat(height, width, CvType.CV_8UC4, new Scalar(0, 0, 0));
         tmp1 = new Mat(height, width, CvType.CV_8UC4);
         tmp2 = new Mat(width, height, CvType.CV_8UC4);
-        GlobalFrameGrabber.frameGrabber = this;
+
+
+        if (frameGrabber != null) {
+            imageProcessor = frameGrabber.getImageProcessor();
+        }
+        frameGrabber = this;
     }
 
     @Override
@@ -140,7 +185,6 @@ public class RealFrameGrabber implements FrameGrabber {
         loopTimer = 0;
     }
 
-    //getter for the result
     @Override
     public boolean isResultReady() {
         return resultReady;
@@ -159,6 +203,10 @@ public class RealFrameGrabber implements FrameGrabber {
 
     @Override
     public Mat receiveFrame(Mat inputFrame) {
+        //throw frames away instead of stopping if that behavior has been requested
+        if (throwAway && mode == FrameGrabberMode.STOPPED) {
+            mode = FrameGrabberMode.THROWAWAY;
+        }
         if (mode == FrameGrabberMode.SINGLE) { //if a single frame was requested
             processFrame(inputFrame); //process it
             stopFrameGrabber(); //and stop grabbing
@@ -187,6 +235,10 @@ public class RealFrameGrabber implements FrameGrabber {
         return frame; //this is displayed on the screen
     }
 
+    /**
+     * Process a single frame
+     * @param inputFrame the frame
+     */
     private void processFrame(Mat inputFrame) {
         if (imageProcessor == null) {
             return;

@@ -5,25 +5,40 @@ import java.util.Collections;
 import java.util.List;
 
 import ftc.electronvolts.util.Utility;
+import ftc.electronvolts.util.units.Velocity;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/12/16
  * <p/>
- * The general case for a collection of N motors.
+ * A general controller for a collection of N motors.
  * Knows how to run the motors given a list of Doubles.
  * Can normalize the powers/speeds before running if requested.
+ * Subclasses can have fixed numbers of motors
  */
 public class NMotors {
+    /**
+     * the list of motors that are grouped
+     */
     private final List<Motor> motors;
+
+    /**
+     * whether or not to use speed mode on the motors
+     */
     private final boolean useSpeedMode;
 
     /**
-     * @param motors       the list of motors
-     * @param useSpeedMode true if encoder-regulated speed mode is desired
-     * @param stopBehavior what to do when the power/speed is 0
+     * the measured maximum speed of the robot
      */
-    public NMotors(List<Motor> motors, boolean useSpeedMode, Motor.StopBehavior stopBehavior) {
+    private final Velocity maxRobotSpeed;
+
+    /**
+     * @param motors        the list of motors
+     * @param useSpeedMode  true if encoder-regulated speed mode is desired
+     * @param stopBehavior  what to do when the power/speed is 0
+     * @param maxRobotSpeed the measured maximum speed of the robot
+     */
+    public NMotors(List<Motor> motors, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {
         //if using speed mode, the motors need to have encoders
         if (useSpeedMode) {
             for (int i = 0; i < motors.size(); i++) {
@@ -34,7 +49,15 @@ public class NMotors {
         }
         this.motors = motors;
         this.useSpeedMode = useSpeedMode;
+        this.maxRobotSpeed = maxRobotSpeed.abs();
         setStopBehavior(stopBehavior);
+    }
+
+    /**
+     * @return the measured maximum speed of the robot
+     */
+    public Velocity getMaxRobotSpeed() {
+        return maxRobotSpeed;
     }
 
     /**
@@ -102,9 +125,11 @@ public class NMotors {
         }
     }
 
+    /**
+     * stop all the motors
+     */
     public void stopMotors() {
         //create a list of the same length as motors filled with zeroes
         runMotors(new ArrayList<>(Collections.nCopies(motors.size(), 0.0)));
     }
-
 }

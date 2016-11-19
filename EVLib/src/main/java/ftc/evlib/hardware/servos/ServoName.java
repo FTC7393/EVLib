@@ -8,7 +8,8 @@ package ftc.evlib.hardware.servos;
  */
 public interface ServoName {
     /**
-     * @return the name as defined in the phone's robot config
+     * @return the name as defined in the hardwareMap
+     * @see com.qualcomm.robotcore.hardware.HardwareMap
      */
     String getHardwareName();
 

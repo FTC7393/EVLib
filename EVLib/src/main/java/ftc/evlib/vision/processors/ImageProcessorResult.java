@@ -3,16 +3,22 @@ package ftc.evlib.vision.processors;
 import org.opencv.core.Mat;
 
 /**
- * Stores the time the processing started and ended
- * Can be extended to store results of an ImageProcessor object
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/27/16.
+ *
+ * Stores results of an ImageProcessor object,
+ * and the time the processing started and ended
  */
 public class ImageProcessorResult<ResultType> {
     private final long startTime, endTime;
     private final ResultType result;
     private final Mat frame;
 
+    /**
+     * @param startTime the time the frame was taken
+     * @param frame the frame
+     * @param result the result of your type
+     */
     ImageProcessorResult(long startTime, Mat frame, ResultType result) {
         this.startTime = startTime;
         this.result = result;

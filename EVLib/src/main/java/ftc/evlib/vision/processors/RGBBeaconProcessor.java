@@ -16,9 +16,10 @@ import ftc.evlib.util.StepTimer;
 import ftc.evlib.vision.ImageUtil;
 
 /**
- * determines the position and color of the beacon in an image
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/25/16.
+ *
+ * determines the position and color (red, green, or blue) of the beacon in an image
  */
 public class RGBBeaconProcessor implements ImageProcessor<BeaconResult> {
     private static final String TAG = "RGBBeaconProcessor";

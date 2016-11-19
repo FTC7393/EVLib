@@ -1,48 +1,57 @@
 package ftc.evlib.statemachine;
 
+import android.util.Log;
+
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+
 import java.util.List;
-import java.util.Map;
 
 import ftc.electronvolts.statemachine.AbstractState;
 import ftc.electronvolts.statemachine.BasicAbstractState;
 import ftc.electronvolts.statemachine.EndCondition;
 import ftc.electronvolts.statemachine.EndConditions;
 import ftc.electronvolts.statemachine.State;
-import ftc.electronvolts.statemachine.StateMachine;
-import ftc.electronvolts.statemachine.StateMachineBuilder;
 import ftc.electronvolts.statemachine.StateName;
 import ftc.electronvolts.statemachine.States;
 import ftc.electronvolts.statemachine.Transition;
-import ftc.electronvolts.util.Angle;
-import ftc.electronvolts.util.Distance;
 import ftc.electronvolts.util.InputExtractor;
+import ftc.electronvolts.util.PIDController;
 import ftc.electronvolts.util.ResultReceiver;
-import ftc.electronvolts.util.Time;
-import ftc.electronvolts.util.Velocity;
+import ftc.electronvolts.util.TeamColor;
+import ftc.electronvolts.util.units.Angle;
+import ftc.electronvolts.util.units.Distance;
+import ftc.electronvolts.util.units.Time;
+import ftc.electronvolts.util.units.Velocity;
 import ftc.evlib.hardware.control.MecanumControl;
 import ftc.evlib.hardware.control.RotationControl;
 import ftc.evlib.hardware.control.RotationControls;
 import ftc.evlib.hardware.control.TranslationControl;
 import ftc.evlib.hardware.control.TranslationControls;
 import ftc.evlib.hardware.motors.MecanumMotors;
+import ftc.evlib.hardware.motors.Motor;
 import ftc.evlib.hardware.motors.NMotors;
 import ftc.evlib.hardware.motors.TwoMotors;
+import ftc.evlib.hardware.sensors.DistanceSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;
-import ftc.evlib.hardware.servos.ServoCommand;
+import ftc.evlib.hardware.sensors.LineSensorArray;
 import ftc.evlib.hardware.servos.ServoControl;
 import ftc.evlib.hardware.servos.Servos;
 import ftc.evlib.vision.framegrabber.FrameGrabber;
+import ftc.evlib.vision.framegrabber.VuforiaFrameGrabberInit;
 import ftc.evlib.vision.processors.BeaconColorResult;
+import ftc.evlib.vision.processors.BeaconName;
 import ftc.evlib.vision.processors.ImageProcessor;
 import ftc.evlib.vision.processors.ImageProcessorResult;
 import ftc.evlib.vision.processors.Location;
 import ftc.evlib.vision.processors.RGBBeaconProcessor;
+import ftc.evlib.vision.processors.VuforiaBeaconColorProcessor;
 
 import static ftc.evlib.driverstation.Telem.telemetry;
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
+import static ftc.evlib.vision.framegrabber.VuforiaFrameGrabberInit.beacons;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -50,37 +59,125 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  */
 public class EVStates extends States {
 
-    public static State subStates(StateName stateName, final StateMachineBuilder stateMachineBuilder, final Map<StateName, StateName> subStateToState) {
-        StateName firstState = stateMachineBuilder.build().getCurrentStateName();
-        for (Map.Entry<StateName, StateName> entry : subStateToState.entrySet()) {
-            StateName subState = entry.getKey();
-            stateMachineBuilder.add(States.basicEmpty(subState, firstState));
-        }
-        final StateMachine stateMachine = stateMachineBuilder.build();
+    /**
+     * Displays the left and right color of a BeaconColorResult
+     *
+     * @param stateName the name of the state
+     * @param receiver  the ResultReceiver to get the color from
+     * @return the created State
+     */
+    public static State displayBeaconColor(StateName stateName, final ResultReceiver<BeaconColorResult> receiver) {
         return new BasicAbstractState(stateName) {
-            private StateName nextStateName;
-
             @Override
             public void init() {
+
             }
 
             @Override
             public boolean isDone() {
-                stateMachine.act();
-                for (Map.Entry<StateName, StateName> entry : subStateToState.entrySet()) {
-                    //if the current state is one of the ending sub-states
-                    if (stateMachine.getCurrentStateName() == entry.getKey()) {
-                        //go to the corresponding super-state
-                        nextStateName = entry.getValue();
-                        return true;
-                    }
+                if (receiver.isReady()) {
+                    BeaconColorResult result = receiver.getValue();
+                    telemetry.addData("leftColor", result.getLeftColor());
+                    telemetry.addData("rightColor", result.getRightColor());
+                } else {
+                    telemetry.addData("receiver not ready", "");
                 }
                 return false;
             }
 
             @Override
             public StateName getNextStateName() {
-                return nextStateName;
+                return null;
+            }
+        };
+    }
+
+    /**
+     * Uses vuforia to find the beacon target image, then uses opencv to determine the beacon color
+     *
+     * @param stateName         the name of the state
+     * @param successState      the state to go to if it succeeds
+     * @param failState         the state to go to if it fails
+     * @param timeoutState      the state to go to if it times out
+     * @param timeoutTime       the time before it will time out
+     * @param receiver          the ResultReceiver to get the VuforiaFrameGrabberInit object from
+     * @param beaconColorResult the ResultReceiver to store the result in
+     * @param teamColor         your team's color to decide which beacons to look for
+     * @param numFrames         the number of frames to process
+     * @param saveImages        whether or not to save the frames for logging
+     * @return the created State
+     */
+    public static State findBeaconColorState(StateName stateName, final StateName successState, final StateName failState, final StateName timeoutState, Time timeoutTime, final ResultReceiver<VuforiaFrameGrabberInit> receiver, final ResultReceiver<BeaconColorResult> beaconColorResult, TeamColor teamColor, final int numFrames, final boolean saveImages) {
+        final List<BeaconName> beaconNames = BeaconName.getNamesForTeamColor(teamColor);
+        final EndCondition timeout = EndConditions.timed(timeoutTime);
+
+        return new BasicAbstractState(stateName) {
+            private VuforiaFrameGrabberInit vuforia = null;
+            private VuforiaBeaconColorProcessor processor = null;
+            private BeaconName beaconName;
+            private int beaconIndex = 0; //index of the beaconNames list
+            private boolean timedOut = false;
+
+            @Override
+            public void init() {
+                timeout.init();
+                timedOut = false;
+
+                if (beaconIndex >= beaconNames.size()) {
+                    beaconIndex = 0;
+                    //we should never go here
+                }
+                beaconName = beaconNames.get(beaconIndex);
+                if (processor != null) {
+                    processor.setBeaconName(beaconName);
+                }
+            }
+
+            @Override
+            public boolean isDone() {
+                if (vuforia == null && receiver.isReady()) {
+                    vuforia = receiver.getValue();
+                    if (vuforia == null) {
+                        Log.e("EVStates", "vuforia is null!!!!!!!!!!!!!");
+                    }
+
+                    processor = new VuforiaBeaconColorProcessor(vuforia);
+                    processor.setBeaconName(beaconName);
+
+                    VuforiaTrackable beacon = beacons.get(beaconName);
+                    beacon.getTrackables().activate();
+
+                    frameGrabber.setImageProcessor(processor);
+                    frameGrabber.setSaveImages(saveImages);
+                    frameGrabber.grabContinuousFrames();
+                }
+                timedOut = timeout.isDone();
+                return timedOut || processor != null && processor.getResultsFound() >= numFrames;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                beaconIndex++;
+                frameGrabber.stopFrameGrabber();
+                VuforiaTrackable beacon = beacons.get(beaconName);
+                beacon.getTrackables().deactivate();
+
+                BeaconColorResult result = processor.getAverageResult();
+                processor.reset();
+                BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
+                BeaconColorResult.BeaconColor rightColor = result.getRightColor();
+                if ((leftColor == BeaconColorResult.BeaconColor.RED && rightColor == BeaconColorResult.BeaconColor.BLUE)
+                        || (leftColor == BeaconColorResult.BeaconColor.BLUE && rightColor == BeaconColorResult.BeaconColor.RED)) {
+                    beaconColorResult.setValue(result);
+                    return successState;
+                } else {
+                    beaconColorResult.setValue(new BeaconColorResult());
+                    if (timedOut) {
+                        return timeoutState;
+                    } else {
+                        return failState;
+                    }
+                }
             }
         };
     }
@@ -91,13 +188,13 @@ public class EVStates extends States {
      * @param stateName       the name of the state
      * @param doneState       the state to go to if it works
      * @param lostObjectState the state to go to if it cannot find the beacon
-     * @param timeoutMillis   the number of milliseconds before the timeout
      * @param timeoutState    the state to go to if it times out
+     * @param timeoutMillis   the number of milliseconds before the timeout
      * @param mecanumControl  the mecanum wheels
      * @param frameGrabber    access to the camera frames
      * @return the created State
      */
-    public static State mecanumCameraTrack(StateName stateName, final StateName doneState, final StateName lostObjectState, long timeoutMillis, final StateName timeoutState, final MecanumControl mecanumControl, final FrameGrabber frameGrabber, ImageProcessor<? extends Location> imageProcessor) {
+    public static State mecanumCameraTrack(StateName stateName, final StateName doneState, final StateName lostObjectState, final StateName timeoutState, long timeoutMillis, final MecanumControl mecanumControl, final FrameGrabber frameGrabber, ImageProcessor<? extends Location> imageProcessor) {
         mecanumControl.setDriveMode(MecanumMotors.MecanumDriveMode.NORMALIZED);
         final TranslationControl beaconTrackingControl = TranslationControls.cameraTracking(frameGrabber, imageProcessor);
         final long timeoutTime = System.currentTimeMillis() + timeoutMillis;
@@ -134,12 +231,12 @@ public class EVStates extends States {
 
     /**
      * @param stateName      the name of the state
+     * @param nextStateName  the name of the next state
      * @param imageProcessor the object that processes the image
      * @param resultReceiver the object that stores the image
-     * @param nextStateName  the name of the next state
      * @return the created State
      */
-    public static State processFrame(StateName stateName, final ImageProcessor imageProcessor, final ResultReceiver<ImageProcessorResult> resultReceiver, final StateName nextStateName) {
+    public static State processFrame(StateName stateName, final StateName nextStateName, final ImageProcessor imageProcessor, final ResultReceiver<ImageProcessorResult> resultReceiver) {
         return new BasicAbstractState(stateName) {
             @Override
             public void init() {
@@ -380,11 +477,11 @@ public class EVStates extends States {
 
     /**
      * @param stateName     the name of the state
-     * @param servos        the servos to be initialized
      * @param nextStateName the name of the next state
+     * @param servos        the servos to be initialized
      * @return the created State
      */
-    public static State servoInit(StateName stateName, final Servos servos, final StateName nextStateName) {
+    public static State servoInit(StateName stateName, final StateName nextStateName, final Servos servos) {
         return new BasicAbstractState(stateName) {
             @Override
             public void init() {
@@ -404,11 +501,11 @@ public class EVStates extends States {
 
     /**
      * @param stateName     the name of the state
-     * @param gyro          the gyro sensor to be calibrated
      * @param nextStateName the name of the next state
+     * @param gyro          the gyro sensor to be calibrated
      * @return the created State
      */
-    public static State calibrateGyro(StateName stateName, final GyroSensor gyro, final StateName nextStateName) {
+    public static State calibrateGyro(StateName stateName, final StateName nextStateName, final GyroSensor gyro) {
         gyro.calibrate();
         return new BasicAbstractState(stateName) {
             @Override
@@ -429,11 +526,11 @@ public class EVStates extends States {
 
     /**
      * @param stateName        the name of the state
-     * @param doubleLineSensor the 2 line sensors to be calibrated
      * @param nextStateName    the name of the next state
+     * @param doubleLineSensor the 2 line sensors to be calibrated
      * @return the created State
      */
-    public static State calibrateLineSensor(StateName stateName, final DoubleLineSensor doubleLineSensor, final StateName nextStateName) {
+    public static State calibrateLineSensor(StateName stateName, final StateName nextStateName, final DoubleLineSensor doubleLineSensor) {
         doubleLineSensor.calibrate();
         return new BasicAbstractState(stateName) {
             @Override
@@ -453,21 +550,81 @@ public class EVStates extends States {
     }
 
     /**
-     * move a servo
+     * Turn a servo to a preset at max speed
      *
      * @param stateName     the name of the state
-     * @param servoCommand  where to move the servo
-     * @param waitForDone   if false, move on to the next state immediately. if true, wait for the servo to finish turning
-     * @param nextStateName the name of the next state
+     * @param nextStateName the name of the state to go to next
+     * @param servoControl  the servo
+     * @param servoPreset   the preset to go to
+     * @param waitForDone   whether to wait for the servo to finish turning or move to the next state immediately
      * @return the created State
      */
-    public static State servoTurn(StateName stateName, final ServoCommand servoCommand, final boolean waitForDone, final StateName nextStateName) {
-        final ServoControl servoControl = servoCommand.getServo();
+    public static State servoTurn(StateName stateName, StateName nextStateName, ServoControl servoControl, Enum servoPreset, boolean waitForDone) {
+        return servoTurn(stateName, nextStateName, servoControl, servoPreset, ServoControl.MAX_SPEED, waitForDone);
+    }
+
+    /**
+     * Turn a servo to a preset at a given speed
+     *
+     * @param stateName     the name of the state
+     * @param nextStateName the name of the state to go to next
+     * @param servoControl  the servo
+     * @param servoPreset   the preset to go to
+     * @param speed         the speed to turn the servo at
+     * @param waitForDone   whether to wait for the servo to finish turning or move to the next state immediately
+     * @return the created State
+     */
+    public static State servoTurn(StateName stateName, final StateName nextStateName, final ServoControl servoControl, final Enum servoPreset, final double speed, final boolean waitForDone) {
         return new BasicAbstractState(stateName) {
 
             @Override
             public void init() {
-                servoControl.go(servoCommand);
+                servoControl.goToPreset(servoPreset, speed);
+            }
+
+            @Override
+            public boolean isDone() {
+                return !waitForDone || servoControl.isDone();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return nextStateName;
+            }
+        };
+    }
+
+    /**
+     * Turn a servo to a position at max speed
+     *
+     * @param stateName     the name of the state
+     * @param nextStateName the name of the state to go to next
+     * @param servoControl  the servo
+     * @param servoPosition the position to go to
+     * @param waitForDone   whether to wait for the servo to finish turning or move to the next state immediately
+     * @return the created State
+     */
+    public static State servoTurn(StateName stateName, StateName nextStateName, ServoControl servoControl, double servoPosition, boolean waitForDone) {
+        return servoTurn(stateName, nextStateName, servoControl, servoPosition, ServoControl.MAX_SPEED, waitForDone);
+    }
+
+    /**
+     * Turn a servo to a position at a given speed
+     *
+     * @param stateName     the name of the state
+     * @param nextStateName the name of the state to go to next
+     * @param servoControl  the servo
+     * @param servoPosition the position to go to
+     * @param speed         the speed to turn the servo at
+     * @param waitForDone   whether to wait for the servo to finish turning or move to the next state immediately
+     * @return the created State
+     */
+    public static State servoTurn(StateName stateName, final StateName nextStateName, final ServoControl servoControl, final double servoPosition, final double speed, final boolean waitForDone) {
+        return new BasicAbstractState(stateName) {
+
+            @Override
+            public void init() {
+                servoControl.setPosition(servoPosition, speed);
             }
 
             @Override
@@ -488,8 +645,8 @@ public class EVStates extends States {
      * travels for a certain amount of time defined by the robots speed and a desired distance
      *
      * @param stateName       the name of the state
-     * @param distance        the distance to travel
      * @param nextStateName   the next state to go to
+     * @param distance        the distance to travel
      * @param mecanumControl  the mecanum wheels
      * @param gyro            the gyro sensor
      * @param velocity        the velocity to drive at
@@ -498,7 +655,7 @@ public class EVStates extends States {
      * @param maxAngularSpeed the max speed to rotate to that angle
      * @return the created State
      */
-    public static State mecanumDrive(StateName stateName, Distance distance, final StateName nextStateName, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation, final double maxAngularSpeed) {
+    public static State mecanumDrive(StateName stateName, final StateName nextStateName, Distance distance, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation, final double maxAngularSpeed) {
         mecanumControl.setDriveMode(MecanumMotors.MecanumDriveMode.NORMALIZED);
         double speedMetersPerMillisecond = mecanumControl.getMaxRobotSpeed().metersPerMillisecond() * velocity;
         final double durationMillis = Math.abs(distance.meters() / speedMetersPerMillisecond);
@@ -507,8 +664,10 @@ public class EVStates extends States {
 
             @Override
             public void init() {
-                mecanumControl.setTranslationControl(TranslationControls.constant(velocity, direction));
-                mecanumControl.setRotationControl(RotationControls.gyro(gyro, orientation, maxAngularSpeed));
+                mecanumControl.setControl(
+                        TranslationControls.constant(velocity, direction),
+                        RotationControls.gyro(gyro, orientation, maxAngularSpeed)
+                );
                 startTime = System.currentTimeMillis();
             }
 
@@ -546,8 +705,10 @@ public class EVStates extends States {
         return new AbstractState(stateName, transitions) {
             @Override
             public void init() {
-                mecanumControl.setTranslationControl(TranslationControls.constant(velocity, direction));
-                mecanumControl.setRotationControl(RotationControls.gyro(gyro, orientation, maxAngularSpeed));
+                mecanumControl.setControl(
+                        TranslationControls.constant(velocity, direction),
+                        RotationControls.gyro(gyro, orientation, maxAngularSpeed)
+                );
             }
 
             @Override
@@ -581,8 +742,8 @@ public class EVStates extends States {
      * travels for a certain amount of time defined by the robots speed and a desired distance
      *
      * @param stateName      the name of the state
-     * @param distance       the distance to travel
      * @param nextStateName  the next state to go to
+     * @param distance       the distance to travel
      * @param mecanumControl the mecanum wheels
      * @param gyro           the gyro sensor
      * @param velocity       the velocity to drive at
@@ -590,8 +751,8 @@ public class EVStates extends States {
      * @param orientation    the angle to rotate to
      * @return the created State
      */
-    public static State mecanumDrive(StateName stateName, Distance distance, StateName nextStateName, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation) {
-        return mecanumDrive(stateName, distance, nextStateName, mecanumControl, gyro, velocity, direction, orientation, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
+    public static State mecanumDrive(StateName stateName, StateName nextStateName, Distance distance, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation) {
+        return mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
     /**
@@ -640,6 +801,15 @@ public class EVStates extends States {
     }
 
 
+    /**
+     * Drive forward or backward with two motors
+     *
+     * @param stateName   the name of the state
+     * @param transitions the transitions to new states
+     * @param twoMotors   the motors to move
+     * @param velocity    the velocity to drive at (negative for backwards)
+     * @return the created State
+     */
     public static State drive(StateName stateName, List<Transition> transitions, final TwoMotors twoMotors, final double velocity) {
         return new AbstractState(stateName, transitions) {
             @Override
@@ -659,7 +829,15 @@ public class EVStates extends States {
         };
     }
 
-
+    /**
+     * Turn left or right
+     *
+     * @param stateName   the name of the state
+     * @param transitions the transitions to new states
+     * @param twoMotors   the motors to move
+     * @param velocity    the velocity to turn at (negative for turning left)
+     * @return the created State
+     */
     public static State turn(StateName stateName, List<Transition> transitions, final TwoMotors twoMotors, final double velocity) {
         return new AbstractState(stateName, transitions) {
             @Override
@@ -679,7 +857,16 @@ public class EVStates extends States {
         };
     }
 
-
+    /**
+     * Turn with one wheel
+     *
+     * @param stateName    the name of the state
+     * @param transitions  the transitions to new states
+     * @param twoMotors    the motors to move
+     * @param isRightWheel tells which wheel to turn
+     * @param velocity     the velocity to turn the wheel at (negative for backwards)
+     * @return the created State
+     */
     public static State oneWheelTurn(StateName stateName, List<Transition> transitions, final TwoMotors twoMotors, final boolean isRightWheel, final double velocity) {
         return new AbstractState(stateName, transitions) {
             @Override
@@ -704,7 +891,18 @@ public class EVStates extends States {
     }
 
 
-    public static State drive(StateName stateName, Distance distance, StateName nextStateName, Velocity maxRobotSpeed, TwoMotors twoMotors, double velocity) {
+    /**
+     * Drive for a certain distance
+     *
+     * @param stateName     the name of the state
+     * @param nextStateName the state to go to after the drive is done
+     * @param distance      the distance to drive
+     * @param maxRobotSpeed the speed of the robot at 100% power
+     * @param twoMotors     the motors to move
+     * @param velocity      the velocity to drive at (negative for backwards)
+     * @return the created State
+     */
+    public static State drive(StateName stateName, StateName nextStateName, Distance distance, Velocity maxRobotSpeed, TwoMotors twoMotors, double velocity) {
         double speedMetersPerMillisecond = maxRobotSpeed.metersPerMillisecond() * velocity;
         double durationMillis = Math.abs(distance.meters() / speedMetersPerMillisecond);
         return drive(stateName, ImmutableList.of(
@@ -715,8 +913,18 @@ public class EVStates extends States {
         ), twoMotors, velocity);
     }
 
-
-    public static State turn(StateName stateName, Angle angle, StateName nextStateName, Time minRobotTurnTime, TwoMotors twoMotors, double velocity) {
+    /**
+     * Turn for a certain angle by calculating the time required for that angle
+     *
+     * @param stateName        the name of the state
+     * @param nextStateName    the state to go to when done turning
+     * @param angle            the angle to turn
+     * @param minRobotTurnTime the time it takes for the robot to turn
+     * @param twoMotors        the motors to run
+     * @param velocity         the velocity to turn (negative for turning left)
+     * @return the created State
+     */
+    public static State turn(StateName stateName, StateName nextStateName, Angle angle, Time minRobotTurnTime, TwoMotors twoMotors, double velocity) {
         double speedRotationsPerMillisecond = velocity / minRobotTurnTime.milliseconds();
         double durationMillis = Math.abs(angle.degrees() / 360 / speedRotationsPerMillisecond);
         return turn(stateName, ImmutableList.of(
@@ -727,18 +935,39 @@ public class EVStates extends States {
         ), twoMotors, velocity);
     }
 
-
-    public static State turn(StateName stateName, Angle angle, StateName nextStateName, GyroSensor gyro, TwoMotors twoMotors, double velocity) {
+    /**
+     * Turn for a certain angle using a gyro sensor
+     *
+     * @param stateName     the name of the state
+     * @param nextStateName the state to go to when done turning
+     * @param angle         the angle to turn
+     * @param gyro          the gyro sensor to use
+     * @param twoMotors     the motors to turn
+     * @param velocity      the velocity to turn at (negative to turn left)
+     * @return the created State
+     */
+    public static State turn(StateName stateName, StateName nextStateName, Angle angle, GyroSensor gyro, TwoMotors twoMotors, double velocity) {
         return turn(stateName, ImmutableList.of(
                 new Transition(
-                        EVEndConditions.gyroCloseToRelative(gyro, angle.degrees(), 5),
+                        EVEndConditions.gyroCloseToRelative(gyro, angle, Angle.fromDegrees(5)),
                         nextStateName
                 )
         ), twoMotors, velocity);
     }
 
-
-    public static State oneWheelTurn(StateName stateName, Angle angle, StateName nextStateName, Time minRobotTurnTime, TwoMotors twoMotors, boolean isRightWheel, double velocity) {
+    /**
+     * Turn with one wheel for a certain angle by calculating the time needed to turn that angle
+     *
+     * @param stateName        the name of the state
+     * @param nextStateName    the state to go to when done turning
+     * @param angle            the angle to turn
+     * @param minRobotTurnTime the time it takes for the robot to turn
+     * @param twoMotors        the motors to turn
+     * @param isRightWheel     tells which wheel to turn
+     * @param velocity         the velocity to turn the wheel at (negative for backwards)
+     * @return the created State
+     */
+    public static State oneWheelTurn(StateName stateName, StateName nextStateName, Angle angle, Time minRobotTurnTime, TwoMotors twoMotors, boolean isRightWheel, double velocity) {
         double speedRotationsPerMillisecond = velocity / minRobotTurnTime.milliseconds();
         double durationMillis = Math.abs(2 * angle.degrees() / 360 / speedRotationsPerMillisecond);
         velocity = Math.abs(velocity) * Math.signum(angle.radians());
@@ -753,18 +982,129 @@ public class EVStates extends States {
         ), twoMotors, isRightWheel, velocity);
     }
 
-
-    public static State turn(StateName stateName, Angle angle, StateName nextStateName, GyroSensor gyro, TwoMotors twoMotors, boolean isRightWheel, double velocity) {
+    /**
+     * Turn with one wheel for a certain angle using a gyro sensor
+     *
+     * @param stateName     the name of the state
+     * @param nextStateName the state to go to after the turn is done
+     * @param angle         the angle to turn
+     * @param gyro          the gyro sensor to use
+     * @param twoMotors     the motors to turn
+     * @param isRightWheel  which wheel to use
+     * @param velocity      the velocity to turn the wheel at (negative for backwards)
+     * @return the created State
+     */
+    public static State turn(StateName stateName, StateName nextStateName, Angle angle, GyroSensor gyro, TwoMotors twoMotors, boolean isRightWheel, double velocity) {
         velocity = Math.abs(velocity) * Math.signum(angle.radians());
         if (isRightWheel) {
             velocity *= -1;
         }
         return oneWheelTurn(stateName, ImmutableList.of(
                 new Transition(
-                        EVEndConditions.gyroCloseToRelative(gyro, angle.degrees(), 5),
+                        EVEndConditions.gyroCloseToRelative(gyro, angle, Angle.fromDegrees(5)),
                         nextStateName
                 )
         ), twoMotors, isRightWheel, velocity);
+    }
+
+    /**
+     * Turn a motor at a given power
+     *
+     * @param stateName    the name of the state
+     * @param transitions  the transitions to new states
+     * @param motor        the motor to be turned
+     * @param power        the power to turn the motor at
+     * @param stopBehavior whether to brake or coast when the motor stops
+     * @return the created State
+     */
+    public static State motorTurn(StateName stateName, List<Transition> transitions, final Motor motor, final double power, final Motor.StopBehavior stopBehavior) {
+        return new AbstractState(stateName, transitions) {
+            @Override
+            public void init() {
+                motor.setStopBehavior(stopBehavior);
+                motor.setPower(power);
+            }
+
+            @Override
+            public void run() {
+
+            }
+
+            @Override
+            public void dispose() {
+                motor.setPower(0);
+            }
+        };
+    }
+
+    /**
+     * Line up with the beacon using the line sensor array and distance sensor
+     *
+     * @param stateName         the name of the state
+     * @param successState      the state to go to if the line up succeeds
+     * @param failState         the state to go to if the line up fails
+     * @param mecanumControl    the mecanum wheels
+     * @param direction         the direction angle to face
+     * @param gyro              the gyro to use for rotation stabilization
+     * @param distSensor        the distance sensor to detect distance from the beacon
+     * @param lineSensorArray   the line sensor array to line up sideways with the line
+     * @param teamColor         the team you are on and ...
+     * @param beaconColorResult ... the beacon configuration to decide which button to line up with
+     * @param distance          the distance from the beacon to line up to
+     * @return the created State
+     */
+    public static State beaconLineUp(StateName stateName, final StateName successState, final StateName failState, final MecanumControl mecanumControl, final Angle direction, final GyroSensor gyro, final DistanceSensor distSensor, final LineSensorArray lineSensorArray, TeamColor teamColor, final ResultReceiver<BeaconColorResult> beaconColorResult, final Distance distance) {
+        final EndCondition dist = EVEndConditions.distanceSensorLess(distSensor, distance);
+        final BeaconColorResult.BeaconColor myColor = BeaconColorResult.BeaconColor.fromTeamColor(teamColor);
+        final BeaconColorResult.BeaconColor opponentColor = BeaconColorResult.BeaconColor.fromTeamColor(teamColor.opposite());
+
+        return new BasicAbstractState(stateName) {
+            private boolean success;
+            int target = 0;
+
+            @Override
+            public void init() {
+                success = false;
+
+                if (beaconColorResult.isReady()) {
+                    BeaconColorResult result = beaconColorResult.getValue();
+                    BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
+                    BeaconColorResult.BeaconColor rightColor = result.getRightColor();
+                    if (leftColor == myColor && rightColor == opponentColor) {
+                        target = 2;
+                        success = true;
+                    }
+                    if (leftColor == opponentColor && rightColor == myColor) {
+                        target = 14;
+                        success = true;
+                    }
+                }
+
+                mecanumControl.setControl(
+                        RotationControls.gyro(gyro, direction),
+                        TranslationControls.lineUp(lineSensorArray, target, new PIDController(-0.1, 0, 0, 1), distSensor, distance, new PIDController(0.1, 0, 0, 1))
+                );
+                dist.init();
+            }
+
+            @Override
+            public boolean isDone() {
+
+                if (!mecanumControl.translationWorked()) {
+                    success = false;
+                }
+                return !success || dist.isDone();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                mecanumControl.setControl(
+                        TranslationControls.zero(),
+                        RotationControls.zero()
+                );
+                return success ? successState : failState;
+            }
+        };
     }
 
 }

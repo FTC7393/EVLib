@@ -20,7 +20,7 @@ public abstract class TaskWeb<T extends Task, B extends StateMachineBuilder> {
     private final StateName startState, successState, failState, timeoutState;
 
     public TeamColor allianceColor;
-    public B builder;
+    public final B builder;
 
     public abstract B createBuilder(StateName startState);
 
@@ -54,7 +54,7 @@ public abstract class TaskWeb<T extends Task, B extends StateMachineBuilder> {
         subStateToState.put(this.failState, failState);
         subStateToState.put(this.timeoutState, timeoutState);
 
-        builder.add(States.subStates(stateName, builder, subStateToState));
+        builder.add(States.subStates(stateName, subStateToState, builder));
     }
 
     /**
@@ -77,7 +77,7 @@ public abstract class TaskWeb<T extends Task, B extends StateMachineBuilder> {
         subStateToState.put(this.successState, successState);
         subStateToState.put(this.failState, failState);
 
-        builder.add(States.subStates(stateName, builder, subStateToState));
+        builder.add(States.subStates(stateName, subStateToState, builder));
     }
 
 
@@ -106,7 +106,7 @@ public abstract class TaskWeb<T extends Task, B extends StateMachineBuilder> {
             StateName taskTimeoutState = stage.getTaskTimeoutState();
             StateName maneuverFailState = stage.getManeuverFailState();
 
-            builder.addWait(waitState, waitTime, taskState);
+            builder.addWait(waitState, taskState, waitTime);
             addTask(currentTask, taskState, maneuverState, taskFailState, taskTimeoutState);
 
             if (i < stages.size() - 1) {

@@ -5,8 +5,9 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 
-import ftc.electronvolts.util.Angle;
 import ftc.electronvolts.util.Utility;
+import ftc.electronvolts.util.units.Angle;
+import ftc.electronvolts.util.units.Velocity;
 
 import static ftc.evlib.driverstation.Telem.telemetry;
 
@@ -19,28 +20,41 @@ import static ftc.evlib.driverstation.Telem.telemetry;
  */
 public class MecanumMotors extends FourMotors {
 
-    private double velocityX = 0;
-    private double velocityY = 0;
-    private double velocityR = 0;
-
-    private MecanumDriveMode driveMode = MecanumDriveMode.NORMALIZED;
-
-//    public MecanumRobot(List<Motor> motors, boolean useSpeedMode, Motor.StopBehavior stopBehavior) {
-//        super(motors, useSpeedMode, stopBehavior);
-//    }
-
-    public MecanumMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Motor.StopBehavior stopBehavior) {
-        super(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor, useSpeedMode, stopBehavior);
-    }
-
     public enum MecanumDriveMode {
         NORMALIZED, TRANSLATION_NORMALIZED
     }
 
+    //the stored velocities
+    private double velocityX = 0;
+    private double velocityY = 0;
+    private double velocityR = 0;
+
+    //the drive mode
+    private MecanumDriveMode driveMode = MecanumDriveMode.NORMALIZED;
+
+    /**
+     * @param frontLeftMotor  the front left motor
+     * @param frontRightMotor the front right motor
+     * @param backLeftMotor   the back left motor
+     * @param backRightMotor  the back right motor
+     * @param useSpeedMode    whether or not to use speed control on the motors
+     * @param stopBehavior    what to do when the motors are turned off
+     * @param maxRobotSpeed   the measured speed of the robot at 100% power
+     */
+    public MecanumMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {
+        super(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor, useSpeedMode, stopBehavior, maxRobotSpeed);
+    }
+
+    /**
+     * @param mode the drive mode
+     */
     public void setDriveMode(MecanumDriveMode mode) {
         driveMode = mode;
     }
 
+    /**
+     * Update the motor powers
+     */
     public void mecanumDrive() {
         switch (driveMode) {
             case NORMALIZED:
@@ -52,6 +66,10 @@ public class MecanumMotors extends FourMotors {
         }
     }
 
+    /**
+     * run the motors based on the xyr velocities
+     * normalize if any motor power is too large
+     */
     private void mecanumDriveNormalized() {
         //calculate motor powers
         runMotorsNormalized(
@@ -62,7 +80,9 @@ public class MecanumMotors extends FourMotors {
         );
     }
 
-    // Calculate rotational velocity first, and use remaining headway for translation.
+    /**
+     * Calculate rotational velocity first, and use remaining headway for translation.
+     */
     private void mecanumDriveTranslationNormalized() {
         //calculate motor powers
         List<Double> translationValues = ImmutableList.of(
@@ -107,47 +127,72 @@ public class MecanumMotors extends FourMotors {
         runMotors(valuesScaled);
     }
 
-
+    /**
+     * @param velocityX the x velocity
+     */
     public void setVelocityX(double velocityX) {
         this.velocityX = Utility.motorLimit(velocityX);
     }
 
+    /**
+     * @param velocityY the y velocity
+     */
     public void setVelocityY(double velocityY) {
         this.velocityY = Utility.motorLimit(velocityY);
     }
 
+    /**
+     * @param velocityR the rotational velocity
+     */
     public void setVelocityR(double velocityR) {
         this.velocityR = Utility.motorLimit(velocityR);
     }
 
+    /**
+     * set the x and y velocities at the same time
+     *
+     * @param velocityX the x velocity
+     * @param velocityY the y velocity
+     */
     public void setVelocityXY(double velocityX, double velocityY) {
         setVelocityX(velocityX);
         setVelocityY(velocityY);
     }
 
+    /**
+     * set the x, y, and rotational velocities at the same time
+     *
+     * @param velocityX the x velocity
+     * @param velocityY the y velocity
+     * @param velocityR the rotational velocity
+     */
     public void setVelocityXYR(double velocityX, double velocityY, double velocityR) {
         setVelocityX(velocityX);
         setVelocityY(velocityY);
         setVelocityR(velocityR);
     }
 
+    /**
+     * set the x and y velocities using polar coordinates
+     *
+     * @param velocity  the velocity (r of the polar coordinate)
+     * @param direction the direction (theta of the polar coordinate)
+     */
     public void setVelocityPolar(double velocity, Angle direction) {
         double directionRadians = direction.radians();
         setVelocityX(velocity * Math.cos(directionRadians));
         setVelocityY(velocity * Math.sin(directionRadians));
     }
 
+    /**
+     * set the x and y velocities using polar coordinates, and also set the ratational velocity
+     *
+     * @param velocity  the velocity (r of the polar coordinate)
+     * @param direction the direction (theta of the polar coordinate)
+     * @param velocityR the rotational velocity
+     */
     public void setVelocityPolarR(double velocity, Angle direction, double velocityR) {
         setVelocityPolar(velocity, direction);
         setVelocityR(velocityR);
     }
-
-/*    currentX = Hardware.encoderToDistance(
-            motorA.getCurrentPosition() + motorB.getCurrentPosition() +
-            motorC.getCurrentPosition() + motorD.getCurrentPosition());
-
-    //Y = A+D-B-C
-    currentY = Hardware.encoderToDistance(
-            motorA.getCurrentPosition() + motorD.getCurrentPosition() -
-            motorB.getCurrentPosition() - motorC.getCurrentPosition());*/
 }

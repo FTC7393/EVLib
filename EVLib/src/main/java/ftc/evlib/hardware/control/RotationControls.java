@@ -2,9 +2,9 @@ package ftc.evlib.hardware.control;
 
 import com.qualcomm.robotcore.hardware.GyroSensor;
 
-import ftc.electronvolts.util.Angle;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
+import ftc.electronvolts.util.units.Angle;
 
 import static ftc.evlib.driverstation.Telem.telemetry;
 

@@ -65,13 +65,21 @@ public abstract class RobotCfg {
         return accelerometer;
     }
 
-    public Servos getServos() {
-        return new Servos(new HashMap<ServoName, ServoControl>());
-    }
-
+    //this does not need to be overridden
     public ServoControl getServo(ServoName servoName) {
         return getServos().getServoMap().get(servoName);
     }
 
+    //this should be overridden to return your robot's servos
+    public Servos getServos() {
+        return new Servos(new HashMap<ServoName, ServoControl>());
+    }
+
+    //act() and stop() will be called during the opmode
+
+    //act can be used to update sensors, motors, display telemetry, etc.
     public abstract void act();
+
+    //stop can be used to stop motors, close files, etc.
+    public abstract void stop();
 }
