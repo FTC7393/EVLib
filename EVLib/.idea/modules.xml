@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/EVLib.iml" filepath="$PROJECT_DIR$/EVLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../FtcRobotController/FtcRobotController.iml" filepath="$PROJECT_DIR$/../FtcRobotController/FtcRobotController.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../TeamCode/TeamCode.iml" filepath="$PROJECT_DIR$/../TeamCode/TeamCode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ftc7393.iml" filepath="$PROJECT_DIR$/../ftc7393.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../openCVLibrary310/openCVLibrary310.iml" filepath="$PROJECT_DIR$/../openCVLibrary310/openCVLibrary310.iml" />
+    </modules>
+  </component>
+</project>

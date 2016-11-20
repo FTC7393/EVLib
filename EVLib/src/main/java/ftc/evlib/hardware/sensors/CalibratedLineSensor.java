@@ -5,6 +5,8 @@ package ftc.evlib.hardware.sensors;
  * Date Created: 3/8/16
  * <p>
  * manages threshold calculation for the line sensor
+ *
+ * @see AnalogSensor
  */
 public class CalibratedLineSensor implements DigitalSensor {
     private boolean ready = true;

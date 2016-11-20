@@ -11,6 +11,9 @@ import ftc.evlib.hardware.config.RobotCfg;
  * Date Created: 9/12/16
  * <p>
  * extends AbstractOp and adds gamepad edge detection and scaling, and a 2 minute timer
+ *
+ * @see AbstractOp
+ * @see GamepadManager
  */
 public abstract class AbstractTeleOp<Type extends RobotCfg> extends AbstractOp<Type> {
     public GamepadManager driver1;

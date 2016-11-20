@@ -16,8 +16,8 @@ public class ImageProcessorResult<ResultType> {
 
     /**
      * @param startTime the time the frame was taken
-     * @param frame the frame
-     * @param result the result of your type
+     * @param frame     the frame
+     * @param result    the result of your type
      */
     ImageProcessorResult(long startTime, Mat frame, ResultType result) {
         this.startTime = startTime;

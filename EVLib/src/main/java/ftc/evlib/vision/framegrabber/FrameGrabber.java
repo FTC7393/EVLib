@@ -12,6 +12,9 @@ import ftc.evlib.vision.processors.ImageProcessorResult;
  * Date Created: 10/7/16
  *
  * interface for retrieving camera frames
+ *
+ * @see RealFrameGrabber
+ * @see GlobalFrameGrabber
  */
 public interface FrameGrabber {
     /**

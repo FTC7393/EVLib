@@ -11,6 +11,9 @@ import java.util.Map;
  * Date Created: 9/14/16
  * <p>
  * static methods that help build the servoMap
+ *
+ * @see ftc.evlib.hardware.config.RobotCfg
+ * @see ServoControl
  */
 public class ServoCfg {
 

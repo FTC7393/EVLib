@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.LED;
  * red
  * blue
  * white 145 640 550
+ *
+ * @see DigitalSensor
  */
 public class ColorSensor implements DigitalSensor {
     private static final int THRESHOLD = 500;

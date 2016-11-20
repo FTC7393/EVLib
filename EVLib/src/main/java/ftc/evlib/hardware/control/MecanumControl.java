@@ -10,6 +10,12 @@ import ftc.evlib.hardware.motors.MecanumMotors;
  * <p>
  * Manages what algorithms control the rotation and translation of the mecanum wheels
  * This allows you to mix and match rotation and translation (x and y) controllers and change them whenever you want
+ *
+ * @see MecanumMotors
+ * @see RotationControl
+ * @see RotationControls
+ * @see TranslationControl
+ * @see TranslationControls
  */
 public class MecanumControl {
     /**

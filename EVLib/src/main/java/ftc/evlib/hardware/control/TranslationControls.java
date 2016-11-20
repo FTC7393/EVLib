@@ -13,12 +13,16 @@ import ftc.evlib.vision.processors.ImageProcessor;
 import ftc.evlib.vision.processors.ImageProcessorResult;
 import ftc.evlib.vision.processors.Location;
 
+import static ftc.evlib.driverstation.Telem.telemetry;
+
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/20/16
  * <p>
  * Factory class for TranslationControl
  * contains implementations for line following, beacon tracking, and normal movement
+ *
+ * @see TranslationControl
  */
 
 public class TranslationControls {
@@ -105,7 +109,10 @@ public class TranslationControls {
                 if (xError < 3) {
                     y = distanceControl.computeCorrection(distanceTarget.meters(), distanceSensor.getDistance().meters());
                 }
+                telemetry.addData("LineUp x", x);
+                telemetry.addData("LineUp y", y);
                 return new Vector2D(x, y);
+//                return new Vector2D(0, 0);
             }
         };
     }

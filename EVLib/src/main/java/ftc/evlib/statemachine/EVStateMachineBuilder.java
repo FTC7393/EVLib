@@ -26,6 +26,9 @@ import ftc.evlib.vision.processors.BeaconColorResult;
  * <p>
  * Builder that uses the EVStates Factory class to create states and build them into a StateMachine
  * extends StateMachineBuilder which has the basic builder methods as well as some useful addXYZ methods
+ *
+ * @see EVStates
+ * @see StateMachineBuilder
  */
 public class EVStateMachineBuilder extends StateMachineBuilder {
     private final MecanumControl mecanumControl;

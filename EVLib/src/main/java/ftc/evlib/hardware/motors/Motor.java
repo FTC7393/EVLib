@@ -6,6 +6,9 @@ package ftc.evlib.hardware.motors;
  * <p>
  * Wrapper class for the DcMotor.
  * This represents the functions a motor without an encoder can do.
+ *
+ * @see MotorEnc
+ * @see Motors
  */
 public interface Motor {
     /**

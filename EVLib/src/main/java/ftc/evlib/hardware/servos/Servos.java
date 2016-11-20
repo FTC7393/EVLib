@@ -10,6 +10,8 @@ import ftc.evlib.util.FileUtil;
  * Date Created: 5/1/16
  * <p>
  * stores multiple servos and coordinates updating them
+ *
+ * @see ServoControl
  */
 public class Servos {
     private final Map<ServoName, ServoControl> servoMap;

@@ -22,6 +22,7 @@ public class Circle implements Comparable<Circle> {
 
     /**
      * Create a Circle from an ellipse
+     *
      * @param ellipse the ellipse as a RotatedRect object
      */
     public Circle(RotatedRect ellipse) {
@@ -43,6 +44,7 @@ public class Circle implements Comparable<Circle> {
 
     /**
      * Compare circles by area
+     *
      * @param another the other circle
      * @return an integer that represents the comparison result
      */

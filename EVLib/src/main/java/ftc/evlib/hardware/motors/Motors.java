@@ -16,6 +16,9 @@ import ftc.electronvolts.util.Utility;
  * <p>
  * Factory class for creating Motor wrapper classes.
  * Has methods for all the combinations of with/without encoders and forward/reversed.
+ *
+ * @see Motor
+ * @see MotorEnc
  */
 public class Motors {
     public static Motor combined(boolean hasEncoder, Motor motor1, Motor motor2) {

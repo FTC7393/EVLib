@@ -45,11 +45,11 @@ public class BeaconPositionResult {
     private final double score;
 
     /**
-     * @param leftButton the position of the left beacon button
-     * @param rightButton the position of the right beacon button
-     * @param size the size of the beacon
+     * @param leftButton   the position of the left beacon button
+     * @param rightButton  the position of the right beacon button
+     * @param size         the size of the beacon
      * @param angleDegrees the angle from the horizontal
-     * @param score the overall score of the match
+     * @param score        the overall score of the match
      */
     BeaconPositionResult(Point leftButton, Point rightButton, Size size, double angleDegrees, double score) {
         this.leftButton = leftButton;

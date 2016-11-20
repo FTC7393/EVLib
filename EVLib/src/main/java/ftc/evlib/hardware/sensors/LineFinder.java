@@ -8,6 +8,9 @@ import static ftc.evlib.driverstation.Telem.telemetry;
  * Date Created: 4/10/16
  * <p>
  * Combines two line sensors and an LED-powered color sensor to detect the color of lines
+ *
+ * @see ColorSensor
+ * @see DoubleLineSensor
  */
 public class LineFinder implements DigitalSensor {
     public enum LineColor {

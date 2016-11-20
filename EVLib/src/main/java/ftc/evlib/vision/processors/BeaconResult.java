@@ -11,7 +11,7 @@ public class BeaconResult {
     private final BeaconPositionResult positionResult;
 
     /**
-     * @param colorResult the beacon's color
+     * @param colorResult    the beacon's color
      * @param positionResult the beacon's position
      */
     public BeaconResult(BeaconColorResult colorResult, BeaconPositionResult positionResult) {

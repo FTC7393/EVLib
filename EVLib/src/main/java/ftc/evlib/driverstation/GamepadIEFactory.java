@@ -10,6 +10,9 @@ import ftc.electronvolts.util.InputExtractor;
  * <p>
  * Factory class for gamepad InputExtractors
  * each method extracts one input from the gamepad
+ *
+ * @see InputExtractor
+ * @see GamepadManager
  */
 public class GamepadIEFactory {
 

@@ -115,7 +115,7 @@ public class VuforiaBeaconColorProcessor implements ImageProcessor<BeaconColorRe
         VuforiaTrackable beacon = beacons.get(beaconName);
 
         Log.i(TAG, beaconName.name());
-        Log.i(TAG, beacon.getName());
+//        Log.i(TAG, beacon.getName());
 
         OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) beacon.getListener()).getRawPose();
 

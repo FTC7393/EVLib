@@ -22,6 +22,8 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  * Date Created: 10/7/16
  *
  * This implements FrameGrabber and uses opencv methods
+ *
+ * @see GlobalFrameGrabber
  */
 public class RealFrameGrabber implements FrameGrabber {
     private FrameGrabberMode mode = FrameGrabberMode.STOPPED;
@@ -75,12 +77,12 @@ public class RealFrameGrabber implements FrameGrabber {
     /**
      * Create a FrameGrabber
      *
-     * @param tag the logging tag
-     * @param width the width of the camera frames it will get
-     * @param height the height of the camera frames it will get
-     * @param cameraOrientation the orientation of the camera on the robot
+     * @param tag                         the logging tag
+     * @param width                       the width of the camera frames it will get
+     * @param height                      the height of the camera frames it will get
+     * @param cameraOrientation           the orientation of the camera on the robot
      * @param ignoreOrientationForDisplay whether or not to flip the output frame when displaying
-     * @param throwAway whether or not to throw away frames instead of stopping
+     * @param throwAway                   whether or not to throw away frames instead of stopping
      */
     public RealFrameGrabber(String tag, int width, int height, CameraOrientation cameraOrientation, boolean ignoreOrientationForDisplay, boolean throwAway) {
         this.cameraOrientation = cameraOrientation;
@@ -237,6 +239,7 @@ public class RealFrameGrabber implements FrameGrabber {
 
     /**
      * Process a single frame
+     *
      * @param inputFrame the frame
      */
     private void processFrame(Mat inputFrame) {

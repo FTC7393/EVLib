@@ -9,6 +9,9 @@ import ftc.evlib.hardware.config.RobotCfg;
  * Date Created: 9/13/16
  *
  * extends AbstractOp and adds a 30 second timer and a state machine
+ *
+ * @see AbstractOp
+ * @see StateMachine
  */
 public abstract class AbstractAutoOp<Type extends RobotCfg> extends AbstractOp<Type> {
     protected StateMachine stateMachine;

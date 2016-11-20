@@ -5,6 +5,8 @@ package ftc.evlib.hardware.servos;
  * Date Created: 9/12/16
  * <p>
  * this interface is meant to be implemented by an enum that defines each servo as an enum item
+ *
+ * @see ftc.evlib.hardware.config.RobotCfg
  */
 public interface ServoName {
     /**

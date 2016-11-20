@@ -3,9 +3,10 @@ package ftc.evlib.vision.processors;
 import org.opencv.core.Point;
 
 /**
- * Stores the hue from each side of the beacon
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 8/29/16.
+ *
+ * Stores the hue from each side of the beacon
  */
 public class HueBeaconResult {
     private final double leftHue, rightHue;

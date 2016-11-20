@@ -7,6 +7,9 @@ import ftc.evlib.Fake;
  * Date Created: 10/7/16
  *
  * This class gives everything access to the camera frames
+ *
+ * @see FrameGrabber
+ * @see RealFrameGrabber
  */
 public class GlobalFrameGrabber {
     /**

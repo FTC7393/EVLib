@@ -15,6 +15,11 @@ import ftc.electronvolts.util.units.Velocity;
  * Knows how to run the motors given a list of Doubles.
  * Can normalize the powers/speeds before running if requested.
  * Subclasses can have fixed numbers of motors
+ *
+ * @see Motor
+ * @see MotorEnc
+ * @see TwoMotors
+ * @see FourMotors
  */
 public class NMotors {
     /**

@@ -18,6 +18,9 @@ import ftc.electronvolts.util.units.Distance;
  * Date Created: 9/11/16
  * <p>
  * Factory class for different types of sensors
+ *
+ * @see DigitalSensor
+ * @see AnalogSensor
  */
 public class Sensors {
     /**

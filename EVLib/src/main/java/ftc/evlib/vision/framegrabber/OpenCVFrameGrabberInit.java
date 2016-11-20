@@ -13,6 +13,9 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  * Date Created: 8/24/16.
  *
  * This initializes opencv and feeds frames to the FrameGrabber
+ *
+ * @see GlobalFrameGrabber
+ * @see RealFrameGrabber
  */
 public class OpenCVFrameGrabberInit implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG = "OpenCVFrameGrabberInit";

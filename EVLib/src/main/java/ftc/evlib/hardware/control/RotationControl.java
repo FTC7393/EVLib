@@ -7,6 +7,9 @@ import ftc.electronvolts.util.units.Angle;
  * Date Created: 9/19/16
  * <p>
  * Controls the rotation of a mecanum robot
+ *
+ * @see RotationControls
+ * @see Angle
  */
 public interface RotationControl {
     double DEFAULT_MAX_ANGULAR_SPEED = 0.8; //0.5;

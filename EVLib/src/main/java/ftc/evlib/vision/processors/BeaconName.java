@@ -10,7 +10,7 @@ import ftc.electronvolts.util.TeamColor;
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 11/15/16
  *
- * enum that epresents the different types of beacon images
+ * enum that represents the different types of beacon images
  */
 public enum BeaconName {
     WHEELS,

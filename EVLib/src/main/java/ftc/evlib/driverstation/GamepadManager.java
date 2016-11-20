@@ -12,8 +12,8 @@ import ftc.electronvolts.util.Functions;
  * Date Created: 1/9/16
  * <p>
  * This class wraps a gamepad and adds:
- * Edge detection to the digital inputs (buttons and dpad)
- * Scaling to the analog inputs (joysticks and triggers)
+ * Edge detection to the digital inputs (buttons and dpad) {@see DigitalInputEdgeDetector}
+ * Scaling to the analog inputs (joysticks and triggers) {@see AnalogInputScaler}
  */
 public class GamepadManager {
     //this stores all the wrapped digital inputs

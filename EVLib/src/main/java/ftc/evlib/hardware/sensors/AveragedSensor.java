@@ -5,6 +5,8 @@ package ftc.evlib.hardware.sensors;
  * Date Created: 3/16/16
  * <p>
  * report the average of the last N values of a sensor as the value
+ *
+ * @see AnalogSensor
  */
 public class AveragedSensor implements AnalogSensor {
     private final AnalogSensor sensor;

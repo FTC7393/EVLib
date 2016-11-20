@@ -14,17 +14,15 @@ import static ftc.evlib.driverstation.Telem.telemetry;
  * https://www.sparkfun.com/products/13582
  *
  * The array has 8 sensors and uses the i2c interface
+ *
+ * @see LineSensorArray
+ * @see I2cDevice
  */
 public class SingleLineSensorArray implements LineSensorArray {
     /**
      * The number of sensors on the array
      */
     public static final int NUM_SENSORS = 8;
-
-    /**
-     * The middle of the center of mass
-     */
-    private static final double CM_MIDDLE = (NUM_SENSORS - 1) / 2.0;
 
     /**
      * the register that holds the line sensor values
@@ -40,7 +38,7 @@ public class SingleLineSensorArray implements LineSensorArray {
     private double centerOfMass;
     private int numSensorsActive;
 
-    private final boolean[] rawValues = new boolean[NUM_SENSORS];
+    private final boolean[] values = new boolean[NUM_SENSORS];
 
     /**
      * @param i2cDevice  the i2c device from the hardwareMap
@@ -57,7 +55,7 @@ public class SingleLineSensorArray implements LineSensorArray {
     }
 
     /**
-     * update the rawValues, numSensorsActive, and centerOfMass variables
+     * update the values, numSensorsActive, and centerOfMass variables
      */
     @Override
     public void update() {
@@ -67,9 +65,9 @@ public class SingleLineSensorArray implements LineSensorArray {
         //get the sensor reading
         byte[] buffer = i2cDeviceReader.getReadBuffer();
 
-        for (int i = 0; i < buffer.length; i++) {
-            telemetry.addData(i2cAddr.get7Bit() + " buffer[" + i + "]", buffer[i]);
-        }
+//        for (int i = 0; i < buffer.length; i++) {
+//            telemetry.addData(i2cAddr.get7Bit() + " buffer[" + i + "]", buffer[i]);
+//        }
 
         //11111111  -1
         //01111111  -2
@@ -84,38 +82,39 @@ public class SingleLineSensorArray implements LineSensorArray {
 //
         // split the byte of data into 8 boolean values
         for (int i = 0; i < NUM_SENSORS; i++) {
-            rawValues[i] = ((buffer[0] & (1 << i)) != 0) ^ isInverted;
+            values[i] = ((buffer[0] & (1 << i)) != 0) ^ isInverted;
             //(1<<i)     is the bit that we want (1, 2, 4, 8, 16, etc.)
             //(buffer[0] & (1 << i)     retrieves that bit
             // ... != 0)     converts the int to a boolean
             // ... ^ isInverted     flips the boolean if isInverted is true
 
-//            telemetry.addData(i2cAddr.get7Bit() + " rawValues[" + i + "]", rawValues[i]);
+//            telemetry.addData(i2cAddr.get7Bit() + " values[" + i + "]", values[i]);
         }
 
         //the loop above is equivalent to the following old code:
-//        rawValues[0] = ((buffer[0] & 0x01) != 0) ^ isInverted;
-//        rawValues[1] = ((buffer[0] & 0x02) != 0) ^ isInverted;
-//        rawValues[2] = ((buffer[0] & 0x04) != 0) ^ isInverted;
-//        rawValues[3] = ((buffer[0] & 0x08) != 0) ^ isInverted;
-//        rawValues[4] = ((buffer[0] & 0x10) != 0) ^ isInverted;
-//        rawValues[5] = ((buffer[0] & 0x20) != 0) ^ isInverted;
-//        rawValues[6] = ((buffer[0] & 0x40) != 0) ^ isInverted;
-//        rawValues[7] = ((buffer[0] & 0x80) != 0) ^ isInverted;
+//        values[0] = ((buffer[0] & 0x01) != 0) ^ isInverted;
+//        values[1] = ((buffer[0] & 0x02) != 0) ^ isInverted;
+//        values[2] = ((buffer[0] & 0x04) != 0) ^ isInverted;
+//        values[3] = ((buffer[0] & 0x08) != 0) ^ isInverted;
+//        values[4] = ((buffer[0] & 0x10) != 0) ^ isInverted;
+//        values[5] = ((buffer[0] & 0x20) != 0) ^ isInverted;
+//        values[6] = ((buffer[0] & 0x40) != 0) ^ isInverted;
+//        values[7] = ((buffer[0] & 0x80) != 0) ^ isInverted;
 
         //count the number of sensors active and the center of mass
         numSensorsActive = 0;
         centerOfMass = 0;
         for (int i = 0; i < NUM_SENSORS; i++) {
-            if (rawValues[i]) {
+            if (values[i]) {
                 numSensorsActive++;
-                centerOfMass += i + CM_MIDDLE;
+                centerOfMass += i;
             }
         }
         if (numSensorsActive == 0) {
             centerOfMass = 0;
         } else {
             centerOfMass /= numSensorsActive;
+            centerOfMass = 0.25 * centerOfMass - 1;
         }
 
         telemetry.addData(i2cAddr.get7Bit() + " center of mass", centerOfMass);
@@ -123,8 +122,8 @@ public class SingleLineSensorArray implements LineSensorArray {
     }
 
     @Override
-    public boolean[] getRawValues() {
-        return rawValues;
+    public boolean getValue(int i) {
+        return values[i];
     }
 
     @Override

@@ -10,6 +10,8 @@ import android.hardware.SensorManager;
  * Date Created: 1/26/16
  * <p>
  * Takes the values from the phone accelerometer and stores them for our code to retrieve.
+ *
+ * @see ftc.evlib.hardware.config.RobotCfg
  */
 public class Accelerometer implements SensorEventListener {
     private double x = 0, y = 0, z = 0;

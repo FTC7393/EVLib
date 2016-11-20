@@ -8,13 +8,15 @@ import java.util.Map;
 import ftc.electronvolts.util.OptionsFile;
 import ftc.evlib.util.FileUtil;
 
-import static ftc.evlib.driverstation.Telem.telemetry;
-
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/12/16
  *
  * Controls the speed of a servo and stores preset values in a file
+ *
+ * @see Servo
+ * @see ServoName
+ * @see ServoCfg
  */
 public class ServoControl {
     /**
@@ -135,8 +137,8 @@ public class ServoControl {
         }
 
         //record telemetry
-        telemetry.addData("ServoControl " + name + " deltaTime", deltaTime);
-        telemetry.addData("ServoControl " + name + " targetPosition", targetPosition);
+//        telemetry.addData("ServoControl " + name + " deltaTime", deltaTime);
+//        telemetry.addData("ServoControl " + name + " targetPosition", targetPosition);
 
         double positionError = targetPosition - currentPosition; //calculate the distance left to go
         double increment = speed * deltaTime / 1000.0; //calculate the amount to increment

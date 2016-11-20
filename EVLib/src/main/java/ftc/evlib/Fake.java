@@ -249,8 +249,8 @@ public class Fake {
             }
 
             @Override
-            public boolean[] getRawValues() {
-                return new boolean[16];
+            public boolean getValue(int i) {
+                return false;
             }
 
             @Override

@@ -9,6 +9,8 @@ import ftc.electronvolts.util.units.Velocity;
  * Date Created: 12/27/15
  * <p>
  * A subclass of NMotors that provides convenience methods for passing in 4 motor powers.
+ *
+ * @see NMotors
  */
 public class FourMotors extends NMotors {
     public FourMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {

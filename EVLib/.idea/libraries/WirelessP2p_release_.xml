@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="WirelessP2p-release-">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/build/intermediates/exploded-aar/WirelessP2p-release/res" />
+      <root url="jar://$PROJECT_DIR$/build/intermediates/exploded-aar/WirelessP2p-release/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

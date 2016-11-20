@@ -25,7 +25,7 @@ import java.util.List;
  * Useful utility methods for image processing
  */
 public class ImageUtil {
-    //standatrd colors
+    //standard colors
     public static final Scalar WHITE = new Scalar(255, 255, 255);
     public static final Scalar GRAY = new Scalar(128, 128, 128);
     public static final Scalar BLACK = new Scalar(0, 0, 0);

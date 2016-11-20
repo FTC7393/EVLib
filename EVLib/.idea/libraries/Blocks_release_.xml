@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Blocks-release-">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../FtcRobotController/build/intermediates/exploded-aar/Blocks-release/res" />
+      <root url="jar://$PROJECT_DIR$/../FtcRobotController/build/intermediates/exploded-aar/Blocks-release/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../libs/Blocks-release-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

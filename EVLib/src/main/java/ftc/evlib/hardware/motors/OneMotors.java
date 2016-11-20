@@ -9,6 +9,8 @@ import ftc.electronvolts.util.units.Velocity;
  * Date Created: 9/12/16
  * <p>
  * A subclass of NMotors that provides convenience methods for passing in 1 motor power.
+ *
+ * @see NMotors
  */
 public class OneMotors extends NMotors {
     public OneMotors(Motor motor, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {

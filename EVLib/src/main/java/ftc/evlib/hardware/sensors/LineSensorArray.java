@@ -5,6 +5,10 @@ package ftc.evlib.hardware.sensors;
  * Date Created: 10/31/16
  *
  * Interface for an array of line sensors
+ *
+ * @see SingleLineSensorArray
+ * @see DoubleLineSensorArray
+ * @see NLineSensorArray
  */
 public interface LineSensorArray {
     /**
@@ -13,9 +17,9 @@ public interface LineSensorArray {
     void update();
 
     /**
-     * @return the array of values from the sensor
+     * @return the value at position i
      */
-    boolean[] getRawValues();
+    boolean getValue(int i);
 
     /**
      * @return the number of sensors in the array

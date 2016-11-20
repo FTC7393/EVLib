@@ -5,6 +5,9 @@ package ftc.evlib.hardware.sensors;
  * Date Created: 3/8/16
  * <p>
  * Manages two line sensors to tell where the robot is relative to the line
+ *
+ * @see CalibratedLineSensor
+ * @see DigitalSensor
  */
 public class DoubleLineSensor implements DigitalSensor {
 

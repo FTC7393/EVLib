@@ -7,6 +7,9 @@ import ftc.electronvolts.util.Vector2D;
  * Date Created: 9/19/16
  * <p>
  * Controls the translation of a mecanum robot
+ *
+ * @see TranslationControls
+ * @see Vector2D
  */
 public interface TranslationControl {
     /**

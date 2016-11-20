@@ -6,13 +6,13 @@ import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.units.Angle;
 
-import static ftc.evlib.driverstation.Telem.telemetry;
-
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/20/16
  * <p>
  * Factory class for RotationControl
+ *
+ * @see RotationControl
  */
 
 public class RotationControls {
@@ -97,7 +97,7 @@ public class RotationControls {
 
                 //find the "signed angular separation", the magnitude and direction of the error
                 double angleRadians = Vector2D.signedAngularSeparation(targetHeadingVector, gyroVector).radians();
-                telemetry.addData("signed angular separation", angleRadians);
+//                telemetry.addData("signed angular separation", angleRadians);
 
 //              This graph shows angle error vs. rotation correction
 //              ____________________________
@@ -126,7 +126,7 @@ public class RotationControls {
                     rotationCorrection = Math.signum(rotationCorrection) * minAngularSpeed;
                 }
 
-                telemetry.addData("rotationCorrection", rotationCorrection);
+//                telemetry.addData("rotationCorrection", rotationCorrection);
 
                 return true;
             }

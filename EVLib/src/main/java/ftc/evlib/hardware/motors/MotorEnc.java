@@ -7,6 +7,9 @@ package ftc.evlib.hardware.motors;
  * Wrapper class for DcMotor if the motor has an encoder
  * This interface has all the non-encoder methods from the Motor interface plus the ones shown here.
  * It can be passed in where a non-encoder Motor interface is needed.
+ *
+ * @see Motor
+ * @see Motors
  */
 public interface MotorEnc extends Motor {
     /**

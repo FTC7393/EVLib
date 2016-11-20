@@ -30,8 +30,8 @@ public class CircleMatch implements Comparable<CircleMatch> {
     /**
      * Create a CircleMatch from two RotatedRect objects
      *
-     * @param c1 one RotatedRect
-     * @param c2 the other RotatedRect
+     * @param c1        one RotatedRect
+     * @param c2        the other RotatedRect
      * @param imageSize the size of the image to scale the circle sizes
      */
     public CircleMatch(RotatedRect c1, RotatedRect c2, Size imageSize) {
@@ -41,8 +41,8 @@ public class CircleMatch implements Comparable<CircleMatch> {
     /**
      * Create a CircleMatch from two Circle objects
      *
-     * @param c1 one Circle
-     * @param c2 the other Circle
+     * @param c1        one Circle
+     * @param c2        the other Circle
      * @param imageSize the size of the image to scale the circle sizes
      */
     public CircleMatch(Circle c1, Circle c2, Size imageSize) {

@@ -47,6 +47,8 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     /**
      * This is implemented by AbstractTeleOp to update the joysticks
      * It is called right before the act() method
+     *
+     * @see AbstractTeleOp
      */
     protected abstract void pre_act();
 
@@ -59,6 +61,8 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     /**
      * This is implemented by AbstractAutoOp to run the StateMachine
      * It is called right after the act() method
+     *
+     * @see AbstractAutoOp
      */
     protected abstract void post_act();
 

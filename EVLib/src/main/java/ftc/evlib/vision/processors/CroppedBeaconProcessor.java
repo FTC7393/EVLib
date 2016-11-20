@@ -19,6 +19,7 @@ import ftc.evlib.vision.ImageUtil;
  *
  * This is used to find the beacon color if the beacon position is known
  * It is handed a cropped image containing only the beacon and is optimized for that type of input
+ *
  * @see VuforiaBeaconColorProcessor
  */
 public class CroppedBeaconProcessor implements ImageProcessor<BeaconColorResult> {

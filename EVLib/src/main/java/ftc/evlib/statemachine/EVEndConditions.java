@@ -20,6 +20,9 @@ import ftc.evlib.hardware.sensors.LineSensorArray;
  * <p>
  * Factory class for EndCondition
  * extends EndConditions, which has some useful factory methods already
+ *
+ * @see EndCondition
+ * @see EndConditions
  */
 public class EVEndConditions extends EndConditions {
 
@@ -29,6 +32,7 @@ public class EVEndConditions extends EndConditions {
      * @param doubleLineSensor   the two line sensors
      * @param detectionsRequired the number of detections in a row to look for (to avoid false positives)
      * @return the created EndCondition
+     * @see DoubleLineSensor
      */
     public static EndCondition foundLine(final DoubleLineSensor doubleLineSensor, final int detectionsRequired) {
         return new EndCondition() {
@@ -62,6 +66,7 @@ public class EVEndConditions extends EndConditions {
      * @param lineColor          the color of line to look for
      * @param detectionsRequired the number of detections in a row to look for (to avoid false positives)
      * @return the created EndCondition
+     * @see LineFinder
      */
     public static EndCondition foundColoredLine(final LineFinder lineFinder, final LineFinder.LineColor lineColor, final int detectionsRequired) {
         return new EndCondition() {
@@ -95,6 +100,7 @@ public class EVEndConditions extends EndConditions {
      * @param target       the target sensor value
      * @param greater      true if the sensor value needs to be greater than the target value
      * @return the created EndCondition
+     * @see AnalogSensor
      */
     public static EndCondition analogSensor(final AnalogSensor analogSensor, final double target, final boolean greater) {
         return new EndCondition() {
@@ -119,6 +125,7 @@ public class EVEndConditions extends EndConditions {
      * @param analogSensor the sensor
      * @param value        the target value
      * @return the created EndCondition
+     * @see AnalogSensor
      */
     public static EndCondition analogSensorGreater(AnalogSensor analogSensor, double value) {
         return analogSensor(analogSensor, value, true);
@@ -130,6 +137,7 @@ public class EVEndConditions extends EndConditions {
      * @param analogSensor the sensor
      * @param value        the target value
      * @return the created EndCondition
+     * @see AnalogSensor
      */
     public static EndCondition analogSensorLess(AnalogSensor analogSensor, double value) {
         return analogSensor(analogSensor, value, false);
@@ -142,6 +150,7 @@ public class EVEndConditions extends EndConditions {
      * @param targetDegrees    the target value (in degrees)
      * @param toleranceDegrees the accepted tolerance to be considered "close to" (in degrees)
      * @return the created EndCondition
+     * @see GyroSensor
      */
     public static EndCondition gyroCloseTo(GyroSensor gyro, double targetDegrees, double toleranceDegrees) {
         return gyroCloseTo(gyro, Angle.fromDegrees(targetDegrees), Angle.fromDegrees(toleranceDegrees));
@@ -154,6 +163,7 @@ public class EVEndConditions extends EndConditions {
      * @param target           the target value
      * @param toleranceDegrees the accepted tolerance to be considered "close to" (in degrees)
      * @return the created EndCondition
+     * @see GyroSensor
      */
     public static EndCondition gyroCloseTo(GyroSensor gyro, Angle target, double toleranceDegrees) {
         return gyroCloseTo(gyro, target, Angle.fromDegrees(toleranceDegrees));
@@ -166,6 +176,7 @@ public class EVEndConditions extends EndConditions {
      * @param targetDegrees the target value (in degrees)
      * @param tolerance     the accepted tolerance to be considered "close to"
      * @return the created EndCondition
+     * @see GyroSensor
      */
     public static EndCondition gyroCloseTo(GyroSensor gyro, double targetDegrees, Angle tolerance) {
         return gyroCloseTo(gyro, Angle.fromDegrees(targetDegrees), tolerance);
@@ -178,6 +189,7 @@ public class EVEndConditions extends EndConditions {
      * @param target    the target value
      * @param tolerance the accepted tolerance to be considered "close to"
      * @return the created EndCondition
+     * @see GyroSensor
      */
     public static EndCondition gyroCloseTo(final GyroSensor gyro, Angle target, final Angle tolerance) {
         final Vector2D targetVector = new Vector2D(1, target);
@@ -202,6 +214,7 @@ public class EVEndConditions extends EndConditions {
      * @param target    the target value relative to the starting heading
      * @param tolerance the accepted tolerance to be considered "close to"
      * @return the created State
+     * @see GyroSensor
      */
     public static EndCondition gyroCloseToRelative(final GyroSensor gyro, Angle target, final Angle tolerance) {
         final Vector2D targetVector = new Vector2D(1, target);
@@ -227,6 +240,7 @@ public class EVEndConditions extends EndConditions {
      *
      * @param colorSensor the sensor
      * @return the created EndCondition
+     * @see ColorSensor
      */
     public static EndCondition colorSensorRedLight(final ColorSensor colorSensor) {
         return new EndCondition() {
@@ -247,6 +261,7 @@ public class EVEndConditions extends EndConditions {
      *
      * @param colorSensor the sensor
      * @return the created EndCondition
+     * @see ColorSensor
      */
     public static EndCondition colorSensorBlueLight(final ColorSensor colorSensor) {
         return new EndCondition() {
@@ -267,6 +282,7 @@ public class EVEndConditions extends EndConditions {
      *
      * @param lineSensorArray the sensor
      * @return the created State
+     * @see LineSensorArray
      */
     public static EndCondition lineSensorArrayAny(final LineSensorArray lineSensorArray) {
         return new EndCondition() {
@@ -289,6 +305,7 @@ public class EVEndConditions extends EndConditions {
      * @param target         the target value
      * @param greater        whether to wait for the sensor to be greater or less than the target
      * @return the created State
+     * @see DistanceSensor
      */
     public static EndCondition distanceSensor(final DistanceSensor distanceSensor, final Distance target, final boolean greater) {
         return new EndCondition() {
@@ -313,6 +330,7 @@ public class EVEndConditions extends EndConditions {
      * @param distanceSensor the distanc sensor
      * @param target         the target Distance
      * @return the created State
+     * @see DistanceSensor
      */
     public static EndCondition distanceSensorLess(DistanceSensor distanceSensor, Distance target) {
         return distanceSensor(distanceSensor, target, false);
@@ -324,6 +342,7 @@ public class EVEndConditions extends EndConditions {
      * @param distanceSensor the distanc sensor
      * @param target         the target Distance
      * @return the created State
+     * @see DistanceSensor
      */
     public static EndCondition distanceSensorGreater(DistanceSensor distanceSensor, Distance target) {
         return distanceSensor(distanceSensor, target, true);

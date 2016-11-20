@@ -7,6 +7,9 @@ import ftc.electronvolts.util.units.Distance;
  * Date Created: 11/9/16
  *
  * Interface for a distance sensor
+ *
+ * @see AnalogSensor
+ * @see Sensors
  */
 public interface DistanceSensor extends AnalogSensor {
     /**

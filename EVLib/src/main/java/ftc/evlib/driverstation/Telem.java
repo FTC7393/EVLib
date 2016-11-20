@@ -14,6 +14,8 @@ import ftc.evlib.Fake;
  * Telem.telemetry = telemetry;
  *
  * To set the telemetry variable for anything to use.
+ *
+ * @see Telemetry
  */
 public class Telem {
     //this will fail silently and move on if you write to it before it is set by the opmode

@@ -8,6 +8,9 @@ import ftc.electronvolts.util.InputExtractor;
  * <p>
  * Interface for any type of analog sensor
  * examples: light sensor, distance sensor, potentiometer
+ *
+ * @see InputExtractor
+ * @see Sensors
  */
 public interface AnalogSensor extends InputExtractor<Double> {
 }

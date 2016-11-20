@@ -2,7 +2,6 @@ package ftc.evlib.vision.framegrabber;
 
 import android.graphics.Bitmap;
 import android.support.annotation.IdRes;
-import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -40,6 +39,9 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  * Date Created: 10/6/16
  *
  * This initializes Vuforia and feeds the frames to the FrameGrabber
+ *
+ * @see GlobalFrameGrabber
+ * @see RealFrameGrabber
  */
 public class VuforiaFrameGrabberInit extends VuforiaLocalizerImpl {
     public static Map<BeaconName, VuforiaTrackable> beacons = null;
@@ -230,11 +232,10 @@ public class VuforiaFrameGrabberInit extends VuforiaLocalizerImpl {
     }
 
     /**
-     *
-     * @param parameters the vuforia parameters
-     * @param widthRequest the width to resize the input frame to
-     * @param heightRequest the height to resize the input frame to
-     * @param cameraOrientation the orientation of the camera on the robot
+     * @param parameters                  the vuforia parameters
+     * @param widthRequest                the width to resize the input frame to
+     * @param heightRequest               the height to resize the input frame to
+     * @param cameraOrientation           the orientation of the camera on the robot
      * @param ignoreOrientationForDisplay whether or not to rotate the output frame to display on the phone
      */
     public VuforiaFrameGrabberInit(Parameters parameters, int widthRequest, int heightRequest, FrameGrabber.CameraOrientation cameraOrientation, boolean ignoreOrientationForDisplay) {

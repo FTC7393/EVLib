@@ -20,7 +20,9 @@ import ftc.evlib.hardware.servos.Servos;
  * <p>
  * Minimum hardware that every robot has.
  * This class can be extended to add more hardware devices for each specific robot.
- * Then each subclass can be used by multiple OpModes.
+ * Then each subclass can be used by multiple OpModes. {@see ftc.evlib.opmodes.AbstractOp}
+ *
+ * @see Servos
  */
 public abstract class RobotCfg {
     private final Context phoneContext;
