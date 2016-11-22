@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.sample.v1;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import ftc.electronvolts.util.Distance;
-import ftc.electronvolts.util.Time;
-import ftc.electronvolts.util.Velocity;
+import ftc.electronvolts.util.units.Distance;
+import ftc.electronvolts.util.units.Time;
+import ftc.electronvolts.util.units.Velocity;
 import ftc.evlib.hardware.config.RobotCfg;
 import ftc.evlib.hardware.motors.Motor;
 import ftc.evlib.hardware.motors.Motors;
@@ -19,10 +19,15 @@ import ftc.evlib.hardware.motors.TwoMotors;
  */
 
 public class SampleRobotCfg extends RobotCfg {
-    //the speed of the robot at 100% power
+    /**
+     * the speed of the robot at 100% power
+     * you should replace this with a measured value
+     */
     public static final Velocity MAX_SPEED = new Velocity(Distance.fromInches(50), Time.fromSeconds(5));
 
-    // this will store the motors of the robot
+    /**
+     * the drive motors of the robot
+     */
     private final TwoMotors twoMotors;
 
     public SampleRobotCfg(HardwareMap hardwareMap) {
@@ -36,17 +41,26 @@ public class SampleRobotCfg extends RobotCfg {
                 //true for speed mode, false for power mode
                 false,
                 //brake the motors when they are stopped
-                Motor.StopBehavior.BRAKE
+                Motor.StopBehavior.BRAKE,
+                MAX_SPEED
         );
     }
 
-    // a getter for the motors
+    /**
+     * gives the opmodes access to the drive motors
+     * @return the drive motors
+     */
     public TwoMotors getTwoMotors() {
         return twoMotors;
     }
 
     @Override
     public void act() {
+
+    }
+
+    @Override
+    public void stop() {
 
     }
 }

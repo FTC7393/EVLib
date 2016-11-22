@@ -24,8 +24,8 @@ public class SampleTeleOp extends AbstractTeleOp<SampleRobotCfg> {
     }
 
     @Override
-    protected SampleRobotCfg createHardwareCfg() {
-        //create a SampleRobotCfg
+    protected SampleRobotCfg createRobotCfg() {
+        //create and return a SampleRobotCfg for the library to use
         return new SampleRobotCfg(hardwareMap);
     }
 
@@ -35,7 +35,7 @@ public class SampleTeleOp extends AbstractTeleOp<SampleRobotCfg> {
     }
 
     @Override
-    protected void setup_loop() {
+    protected void setup_act() {
 
     }
 

@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.Map;
 
-import ftc.electronvolts.util.Distance;
-import ftc.electronvolts.util.Time;
-import ftc.electronvolts.util.Velocity;
+import ftc.electronvolts.util.units.Distance;
+import ftc.electronvolts.util.units.Time;
+import ftc.electronvolts.util.units.Velocity;
 import ftc.evlib.hardware.config.RobotCfg;
 import ftc.evlib.hardware.motors.Motor;
 import ftc.evlib.hardware.motors.Motors;
@@ -23,31 +23,45 @@ import ftc.evlib.hardware.servos.Servos;
  */
 
 public class SampleRobotCfg extends RobotCfg {
-    //the speed of the robot at 100% power
+    /**
+     * the speed of the robot at 100% power
+     * you should replace this with a measured value
+     */
     public static final Velocity MAX_SPEED = new Velocity(Distance.fromInches(50), Time.fromSeconds(5));
 
-    // this will store the motors of the robot
+    /**
+     * the drive motors of the robot
+     */
     private final TwoMotors twoMotors;
 
-    //this will store all the servos of the robot
+    /**
+     * stores all the servos of the robot
+     */
     private final Servos servos;
 
-    //this stores all the possible values for the arm servo
+    /**
+     * all the possible values for the arm servo
+     */
     public enum ArmServoPresets {
         LEFT,
         MIDDLE,
         RIGHT
     }
 
-    //this stores all the possible values for the leg servo
+    /**
+     * all the possible values for the leg servo
+     */
     public enum LegServoPresets {
         DOWN,
         MIDDLE,
         UP
     }
 
-    //this stores all the servos on the robot
+    /**
+     * defines all the servos on the robot
+     */
     public enum SampleServoName implements ServoName {
+        //enum name("hardware name", preset enum.values()),
         ARM_SERVO("armServo", ArmServoPresets.values()),
         LEG_SERVO("legServo", LegServoPresets.values());
 
@@ -70,11 +84,21 @@ public class SampleRobotCfg extends RobotCfg {
         }
     }
 
+    /**
+     * Create the SampleRobotCfg with the default servo starting positions
+     *
+     * @param hardwareMap the hardwareMap from the opmode
+     */
     public SampleRobotCfg(HardwareMap hardwareMap) {
         this(hardwareMap, ServoCfg.defaultServoStartPresetMap(SampleServoName.values()));
     }
 
-
+    /**
+     * Create the SampleRobotCfg with custom servo starting positions
+     *
+     * @param hardwareMap the hardwareMap from the opmode
+     * @param servoStartPresetMap the custom servo starting positions
+     */
     public SampleRobotCfg(HardwareMap hardwareMap, Map<ServoName, Enum> servoStartPresetMap) {
         super(hardwareMap);
 
@@ -86,17 +110,25 @@ public class SampleRobotCfg extends RobotCfg {
                 //true for speed mode, false for power mode
                 false,
                 //brake the motors when they are stopped
-                Motor.StopBehavior.BRAKE
+                Motor.StopBehavior.BRAKE,
+                MAX_SPEED
         );
 
         servos = new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
     }
 
-    // a getter for the motors
+    /**
+     * gives the opmodes access to the drive motors
+     * @return the drive motors
+     */
     public TwoMotors getTwoMotors() {
         return twoMotors;
     }
 
+    /**
+     * gives the opmodes access to the servos
+     * @return the servos
+     */
     @Override
     public Servos getServos() {
         return servos;
@@ -104,6 +136,11 @@ public class SampleRobotCfg extends RobotCfg {
 
     @Override
     public void act() {
+
+    }
+
+    @Override
+    public void stop() {
 
     }
 }

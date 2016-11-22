@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import ftc.electronvolts.statemachine.StateMachine;
 import ftc.electronvolts.statemachine.StateName;
-import ftc.electronvolts.util.Distance;
+import ftc.electronvolts.util.units.Distance;
 import ftc.evlib.opmodes.AbstractAutoOp;
 
 /**
@@ -20,7 +20,10 @@ import ftc.evlib.opmodes.AbstractAutoOp;
 @Autonomous(name="SampleAuto V3")
 public class SampleAuto extends AbstractAutoOp<SampleRobotCfg> {
 
-    //define all the possible states for the state machine
+    /**
+     * defines all the possible states for the state machine
+     * modify this to have whatever states you want
+     */
     private enum S implements StateName {
         SERVO_INIT,
         DRIVE,
@@ -38,23 +41,25 @@ public class SampleAuto extends AbstractAutoOp<SampleRobotCfg> {
         b.addServoInit(S.SERVO_INIT, S.DRIVE);
 
         //define the DRIVE state to drive for 2 feet and move to the STOP state
-        b.addDrive(S.DRIVE, Distance.fromFeet(2), S.SERVO_ARM, 0.5);
+        b.addDrive(S.DRIVE, S.SERVO_ARM, Distance.fromFeet(2), 0.5);
 
         //add the servo turn state
-        b.addServo(S.SERVO_ARM, SampleRobotCfg.SampleServoName.ARM_SERVO, SampleRobotCfg.ArmServoPresets.RIGHT, true, S.STOP);
+        b.addServo(S.SERVO_ARM, S.STOP, SampleRobotCfg.SampleServoName.ARM_SERVO, SampleRobotCfg.ArmServoPresets.RIGHT, true);
 
         //define the STOP state to be empty (and never exit) so the state machine will stop
         b.addStop(S.STOP);
+
+        //build and return the StateMachine
         return b.build();
     }
 
     @Override
-    protected SampleRobotCfg createHardwareCfg() {
+    protected SampleRobotCfg createRobotCfg() {
         return new SampleRobotCfg(hardwareMap);
     }
 
     @Override
-    protected void setup_loop() {
+    protected void setup_act() {
 
     }
 

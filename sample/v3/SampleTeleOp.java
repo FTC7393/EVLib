@@ -40,19 +40,20 @@ public class SampleTeleOp extends AbstractTeleOp<SampleRobotCfg> {
     }
 
     @Override
-    protected SampleRobotCfg createHardwareCfg() {
-        //create a SampleRobotCfg
+    protected SampleRobotCfg createRobotCfg() {
+        //create and return a SampleRobotCfg for the library to use
         return new SampleRobotCfg(hardwareMap);
     }
 
     @Override
     protected void setup() {
+        //get the arm and leg servos from the SampleRobotCfg
         armServo = robotCfg.getServo(SampleRobotCfg.SampleServoName.ARM_SERVO);
         legServo = robotCfg.getServo(SampleRobotCfg.SampleServoName.LEG_SERVO);
     }
 
     @Override
-    protected void setup_loop() {
+    protected void setup_act() {
 
     }
 

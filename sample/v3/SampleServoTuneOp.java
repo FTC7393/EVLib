@@ -28,7 +28,7 @@ import ftc.evlib.opmodes.AbstractServoTuneOp;
 @TeleOp(name="SampleServoTuneOp")
 public class SampleServoTuneOp extends AbstractServoTuneOp {
     @Override
-    protected RobotCfg createHardwareCfg() {
+    protected RobotCfg createRobotCfg() {
         //create a new SampleRobotConfig and return it.
         //the superclass will extract the servos and do the rest.
         return new SampleRobotCfg(hardwareMap);
