@@ -1,19 +1,14 @@
 package ftc.evlib.hardware.control;
 
-import ftc.electronvolts.util.ControlLoop;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.units.Angle;
-import ftc.electronvolts.util.units.Distance;
-import ftc.evlib.hardware.sensors.DistanceSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;
 import ftc.evlib.hardware.sensors.LineSensorArray;
 import ftc.evlib.vision.framegrabber.FrameGrabber;
 import ftc.evlib.vision.processors.ImageProcessor;
 import ftc.evlib.vision.processors.ImageProcessorResult;
 import ftc.evlib.vision.processors.Location;
-
-import static ftc.evlib.driverstation.Telem.telemetry;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -26,8 +21,36 @@ import static ftc.evlib.driverstation.Telem.telemetry;
  */
 
 public class TranslationControls {
+    /**
+     * No movement
+     */
+    public static final TranslationControl ZERO = constant(0, Angle.zero());
 
-    public static TranslationControl inputExtractorPolar(final InputExtractor<Double> velocity, final InputExtractor<Double> directionDegrees) {
+    /**
+     * Controls the translation of a mecanum robot with constant velocity and direction
+     *
+     * @param velocity  how fast to move from -1 to 1
+     * @param direction what direction to move
+     * @return the created TranslationControl
+     */
+    public static TranslationControl constant(double velocity, Angle direction) {
+        final Vector2D vector2D = new Vector2D(velocity, direction);
+        return new TranslationControl() {
+            @Override
+            public boolean act() {
+                return true;
+            }
+
+            @Override
+            public Vector2D getTranslation() {
+                return vector2D;
+            }
+
+
+        };
+    }
+
+    public static TranslationControl inputExtractorPolarDegrees(final InputExtractor<Double> velocity, final InputExtractor<Double> directionDegrees) {
         return new TranslationControl() {
             @Override
             public boolean act() {
@@ -37,6 +60,21 @@ public class TranslationControls {
             @Override
             public Vector2D getTranslation() {
                 return new Vector2D(velocity.getValue(), Angle.fromDegrees(directionDegrees.getValue()));
+            }
+
+        };
+    }
+
+    public static TranslationControl inputExtractorPolar(final InputExtractor<Double> velocity, final InputExtractor<Angle> direction) {
+        return new TranslationControl() {
+            @Override
+            public boolean act() {
+                return true;
+            }
+
+            @Override
+            public Vector2D getTranslation() {
+                return new Vector2D(velocity.getValue(), direction.getValue());
             }
 
         };
@@ -59,7 +97,7 @@ public class TranslationControls {
     }
 
 
-    public static TranslationControl inputExtractorVector(final InputExtractor<Vector2D> vector2D) {
+    public static TranslationControl inputExtractorXY(final InputExtractor<Vector2D> vector2D) {
         return new TranslationControl() {
 
             @Override
@@ -85,37 +123,68 @@ public class TranslationControls {
 
             @Override
             public Vector2D getTranslation() {
-                return new Vector2D(center - lineSensorArray.getCenterOfMass(), velocity * direction.sign);
+                return new Vector2D(center - lineSensorArray.getCentroid(), velocity * direction.sign);
             }
         };
 
     }
 
-    public static TranslationControl lineUp(final LineSensorArray lineSensorArray, final double lineTarget, final ControlLoop lineControl, final DistanceSensor distanceSensor, final Distance distanceTarget, final ControlLoop distanceControl) {
-        lineControl.initialize();
-        distanceControl.initialize();
-        return new TranslationControl() {
-            @Override
-            public boolean act() {
-                lineSensorArray.update();
-                return lineSensorArray.getNumSensorsActive() != 0;
-            }
-
-            @Override
-            public Vector2D getTranslation() {
-                double x = lineControl.computeCorrection(lineTarget, lineSensorArray.getCenterOfMass());
-                double xError = Math.abs(lineTarget - lineSensorArray.getCenterOfMass());
-                double y = 0;
-                if (xError < 3) {
-                    y = distanceControl.computeCorrection(distanceTarget.meters(), distanceSensor.getDistance().meters());
-                }
-                telemetry.addData("LineUp x", x);
-                telemetry.addData("LineUp y", y);
-                return new Vector2D(x, y);
-//                return new Vector2D(0, 0);
-            }
-        };
-    }
+//    public static TranslationControl lineUp(final LineSensorArray lineSensorArray, final double lineTarget, final ControlLoop lineControl, final DistanceSensor distanceSensor, final Distance distanceTarget, final ControlLoop distanceControl) {
+//        final int stopCycles = 5;
+//        lineControl.initialize();
+//        return new TranslationControl() {
+//            private boolean distPIDInit = false;
+//            private int cyclesLeft = -1;
+//            private int lostLineCycles = 0;
+//
+//            private Vector2D translation = new Vector2D(0, 0);
+//
+//            @Override
+//            public boolean act() {
+//                lineSensorArray.update();
+//                if (lineSensorArray.getNumSensorsActive() == 0) {
+//                    lostLineCycles++;
+//                }
+//
+//                if (lostLineCycles >= 5) {
+//                    translation = new Vector2D(0, 0);
+//                    return false;
+//                }
+//
+//                double x = lineControl.computeCorrection(lineTarget, lineSensorArray.getCentroid());
+//                double xError = Math.abs(lineTarget - lineSensorArray.getCentroid());
+//                double y = 0;
+//                if (xError <= 0.1) {
+//                    if (cyclesLeft == -1) {
+//                        cyclesLeft = stopCycles;
+//                    }
+//                    if (cyclesLeft > 0) {
+//                        cyclesLeft--;
+//                        return true;
+//                    }
+//                    if (!distPIDInit) {
+//                        distPIDInit = true;
+//                        distanceControl.initialize();
+//                    }
+//                    y = distanceControl.computeCorrection(distanceTarget.meters(), distanceSensor.getDistance().meters());
+//                } else {
+//                    cyclesLeft = -1;
+//                    distPIDInit = false;
+//                }
+//                telemetry.addData("LineUp x", x);
+//                telemetry.addData("LineUp y", y);
+//                translation = new Vector2D(x, y);
+////                translation = new Vector2D(0, 0);
+//
+//                return true;
+//            }
+//
+//            @Override
+//            public Vector2D getTranslation() {
+//                return translation;
+//            }
+//        };
+//    }
 
 
     public enum LineFollowDirection {
@@ -242,39 +311,6 @@ public class TranslationControls {
             public Vector2D getTranslation() {
                 return new Vector2D(velocity, direction);
             }
-
-        };
-    }
-
-
-    /**
-     * No movement
-     *
-     * @return the created TranslationControl
-     */
-    public static TranslationControl zero() {
-        return constant(0, Angle.fromRadians(0));
-    }
-
-    /**
-     * Controls the translation of a mecanum robot with constant velocity and direction
-     *
-     * @param velocity  how fast to move from 0 to 1
-     * @param direction what direction to move
-     * @return the created TranslationControl
-     */
-    public static TranslationControl constant(final double velocity, final Angle direction) {
-        return new TranslationControl() {
-            @Override
-            public boolean act() {
-                return true;
-            }
-
-            @Override
-            public Vector2D getTranslation() {
-                return new Vector2D(velocity, direction);
-            }
-
 
         };
     }

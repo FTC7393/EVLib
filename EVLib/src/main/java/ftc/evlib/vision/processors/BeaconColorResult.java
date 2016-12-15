@@ -84,7 +84,7 @@ public class BeaconColorResult {
     }
 
     public String toString() {
-        return leftColor + ", " + rightColor;
+        return leftColor + "|" + rightColor;
     }
 
     public BeaconColor getLeftColor() {

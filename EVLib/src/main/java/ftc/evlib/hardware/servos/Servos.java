@@ -1,8 +1,11 @@
 package ftc.evlib.hardware.servos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import ftc.electronvolts.util.OptionsFile;
+import ftc.electronvolts.util.files.OptionsFile;
+import ftc.evlib.util.EVConverters;
 import ftc.evlib.util.FileUtil;
 
 /**
@@ -57,15 +60,15 @@ public class Servos {
      * @param filename the name of the file
      */
     public void storeServoPositions(String filename) {
-        OptionsFile servoPos = new OptionsFile();
+        OptionsFile servoPos = new OptionsFile(EVConverters.getInstance());
         for (Map.Entry<ServoName, ServoControl> entry : servoMap.entrySet()) {
             ServoName servoName = entry.getKey();
             ServoControl servoControl = entry.getValue();
 
-            servoPos.add(servoName.getHardwareName(), servoControl.getCurrentPosition());
+            servoPos.set(servoName.getHardwareName(), servoControl.getCurrentPosition());
         }
         //servoPos.add("time", System.currentTimeMillis());
-        servoPos.writeToFile(FileUtil.getFile(filename));
+        servoPos.writeToFile(FileUtil.getAppFile(filename));
     }
 
     /**
@@ -73,5 +76,9 @@ public class Servos {
      */
     public Map<ServoName, ServoControl> getServoMap() {
         return servoMap;
+    }
+
+    public List<ServoName> getServoNames() {
+        return new ArrayList<>(servoMap.keySet());
     }
 }

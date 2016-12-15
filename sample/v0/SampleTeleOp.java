@@ -10,6 +10,7 @@ import ftc.electronvolts.util.Utility;
 import ftc.evlib.driverstation.GamepadManager;
 import ftc.evlib.hardware.motors.Motor;
 import ftc.evlib.hardware.motors.Motors;
+import ftc.evlib.hardware.motors.Stoppers;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -41,16 +42,17 @@ public class SampleTeleOp extends OpMode {
      */
     private double servoPosition;
 
+    /**
+     * Takes care of stopping both motors
+     */
+    private Stoppers stoppers = new Stoppers();
+
     @Override
     public void init() {
         //get the motors from the hardwareMap and wrap them with the Motor interface
-        leftMotor = Motors.motorWithoutEncoderForward(
-                hardwareMap.dcMotor.get("leftMotor")
-        );
-
-        rightMotor = Motors.motorWithoutEncoderReversed(
-                hardwareMap.dcMotor.get("rightMotor")
-        );
+        //         motor factory class method      hardware name, reversed, brake
+        leftMotor = Motors.withoutEncoder(hardwareMap, "leftMotor", false, true, stoppers);
+        rightMotor = Motors.withoutEncoder(hardwareMap, "rightMotor", true, true, stoppers);
 
         //get the servo from the hardwareMap
         servo = hardwareMap.servo.get("servo");
@@ -92,5 +94,11 @@ public class SampleTeleOp extends OpMode {
 
         //send the command to the servo
         servo.setPosition(servoPosition);
+    }
+
+    @Override
+    public void stop() {
+        //stop both motors
+        stoppers.stop();
     }
 }

@@ -1,5 +1,7 @@
 package ftc.evlib.vision.processors;
 
+import com.google.common.collect.ImmutableList;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ftc.evlib.util.FileUtil;
 import ftc.evlib.vision.ImageUtil;
 
 /**
@@ -96,6 +99,14 @@ public class SimpleBeaconProcessor implements ImageProcessor<BeaconColorResult> 
 
         int[] data = new int[3];
 
+        //used for logging the column sum
+        int[][] colSum1 = new int[hsv.width()][4];
+
+        //column
+        for (int x = 0; x < hsv.width(); x++) {
+            colSum1[x][0] = x;
+        }
+
         //loop through the rgb channels
         for (int i = 0; i < 3; i++) {
             //apply HSV thresholds
@@ -108,7 +119,11 @@ public class SimpleBeaconProcessor implements ImageProcessor<BeaconColorResult> 
             //apply a column sum to the (unscaled) binary image
             Core.reduce(maskedImage, colSum, 0, Core.REDUCE_SUM, 4);
 
-//      ImageUtil.saveImage(TAG, ImageUtil.graphColSum(colSum, hsv.height()), Imgproc.COLOR_GRAY2BGR, "1_column" + i, startTime);
+            //retrieve values to log the column sum
+            for (int x = 0; x < hsv.width(); x++) {
+                colSum.get(0, x, data);
+                colSum1[x][i + 1] = data[0];
+            }
 
             //loop through left and right to calculate mass
             int start = 0;
@@ -136,6 +151,9 @@ public class SimpleBeaconProcessor implements ImageProcessor<BeaconColorResult> 
                 end = hsv.width();
             }
         }
+
+        ImageUtil.log2DArray(FileUtil.getLogsDir(), "simpleColSum", startTime, ".csv", ImmutableList.of("column", "red", "green", "blue"), colSum1);
+
         //merge the 3 binary images into one
         Core.merge(rgbaChannels, rgbaFrame);
 

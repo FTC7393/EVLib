@@ -15,5 +15,5 @@ public class GlobalFrameGrabber {
     /**
      * This must be set by something for other classes to use it
      */
-    public static FrameGrabber frameGrabber = Fake.frameGrabber();
+    public static FrameGrabber frameGrabber = Fake.FRAME_GRABBER;
 }

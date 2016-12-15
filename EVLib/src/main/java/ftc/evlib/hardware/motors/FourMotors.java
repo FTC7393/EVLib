@@ -13,15 +13,15 @@ import ftc.electronvolts.util.units.Velocity;
  * @see NMotors
  */
 public class FourMotors extends NMotors {
-    public FourMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {
-        super(ImmutableList.of(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor), useSpeedMode, stopBehavior, maxRobotSpeed);
+    public FourMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Velocity maxRobotSpeed) {
+        super(ImmutableList.of(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor), useSpeedMode, maxRobotSpeed);
     }
 
     public void runMotorsNormalized(double flValue, double frValue, double blValue, double brValue) {
-        runMotorsNormalized(ImmutableList.of(flValue, frValue, blValue, brValue));
+        runNormalized(ImmutableList.of(flValue, frValue, blValue, brValue));
     }
 
     public void runMotors(double flValue, double frValue, double blValue, double brValue) {
-        runMotors(ImmutableList.of(flValue, frValue, blValue, brValue));
+        run(ImmutableList.of(flValue, frValue, blValue, brValue));
     }
 }

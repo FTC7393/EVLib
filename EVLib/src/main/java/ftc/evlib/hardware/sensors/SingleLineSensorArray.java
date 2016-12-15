@@ -35,7 +35,7 @@ public class SingleLineSensorArray implements LineSensorArray {
 
     private final boolean isInverted;
 
-    private double centerOfMass;
+    private double centroid;
     private int numSensorsActive;
 
     private final boolean[] values = new boolean[NUM_SENSORS];
@@ -55,12 +55,14 @@ public class SingleLineSensorArray implements LineSensorArray {
     }
 
     /**
-     * update the values, numSensorsActive, and centerOfMass variables
+     * update the values, numSensorsActive, and centroid variables
+     *
+     * @return true if the sensor data was updated, otherwise false
      */
     @Override
-    public void update() {
+    public boolean update() {
         //do nothing if the i2c port is busy
-        if (!i2cDevice.isI2cPortReady()) return;
+        if (!i2cDevice.isI2cPortReady()) return false;
 
         //get the sensor reading
         byte[] buffer = i2cDeviceReader.getReadBuffer();
@@ -79,7 +81,8 @@ public class SingleLineSensorArray implements LineSensorArray {
         //11111101  -65
         //11111110  127
 
-//
+        numSensorsActive = 0;
+        centroid = 0;
         // split the byte of data into 8 boolean values
         for (int i = 0; i < NUM_SENSORS; i++) {
             values[i] = ((buffer[0] & (1 << i)) != 0) ^ isInverted;
@@ -89,36 +92,30 @@ public class SingleLineSensorArray implements LineSensorArray {
             // ... ^ isInverted     flips the boolean if isInverted is true
 
 //            telemetry.addData(i2cAddr.get7Bit() + " values[" + i + "]", values[i]);
-        }
 
-        //the loop above is equivalent to the following old code:
-//        values[0] = ((buffer[0] & 0x01) != 0) ^ isInverted;
-//        values[1] = ((buffer[0] & 0x02) != 0) ^ isInverted;
-//        values[2] = ((buffer[0] & 0x04) != 0) ^ isInverted;
-//        values[3] = ((buffer[0] & 0x08) != 0) ^ isInverted;
-//        values[4] = ((buffer[0] & 0x10) != 0) ^ isInverted;
-//        values[5] = ((buffer[0] & 0x20) != 0) ^ isInverted;
-//        values[6] = ((buffer[0] & 0x40) != 0) ^ isInverted;
-//        values[7] = ((buffer[0] & 0x80) != 0) ^ isInverted;
-
-        //count the number of sensors active and the center of mass
-        numSensorsActive = 0;
-        centerOfMass = 0;
-        for (int i = 0; i < NUM_SENSORS; i++) {
+            //if there is an active value
             if (values[i]) {
+                //increment the number of sensors active
                 numSensorsActive++;
-                centerOfMass += i;
+                //and add a mass of 1 to the center of mass
+                centroid += i;
             }
         }
+
+        //check for a divide by 0
         if (numSensorsActive == 0) {
-            centerOfMass = 0;
+            centroid = 0;
         } else {
-            centerOfMass /= numSensorsActive;
-            centerOfMass = 0.25 * centerOfMass - 1;
+            //divide the center of mass by the total mass
+            centroid /= numSensorsActive;
+            //scale it from [0,7] to [-1,1]
+            centroid = 2 / 7 * centroid - 1;
         }
 
-        telemetry.addData(i2cAddr.get7Bit() + " center of mass", centerOfMass);
+        telemetry.addData(i2cAddr.get7Bit() + " center of mass", centroid);
         telemetry.addData(i2cAddr.get7Bit() + " sensors active", numSensorsActive);
+
+        return true;
     }
 
     @Override
@@ -137,7 +134,7 @@ public class SingleLineSensorArray implements LineSensorArray {
     }
 
     @Override
-    public double getCenterOfMass() {
-        return centerOfMass;
+    public double getCentroid() {
+        return centroid;
     }
 }

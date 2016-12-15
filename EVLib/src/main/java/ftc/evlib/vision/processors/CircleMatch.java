@@ -69,7 +69,7 @@ public class CircleMatch implements Comparable<CircleMatch> {
 //    area = (area1 + area2)/2;
         area = Math.max(area1, area2);
 
-        //calclate the difference in sizes
+        //calculate the difference in sizes
         diff = Math.abs(area1 - area2) / area;
 
         //calculate the distance between circles

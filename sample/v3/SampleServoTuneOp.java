@@ -22,10 +22,9 @@ import ftc.evlib.opmodes.AbstractServoTuneOp;
  * Press start to save the current preset of the current servo to the current value.
  *
  * The presets are saved in files that are retrieved when you run other opmodes to find the value of each preset.
- *
  */
 
-@TeleOp(name="SampleServoTuneOp")
+@TeleOp(name = "SampleServoTuneOp V3")
 public class SampleServoTuneOp extends AbstractServoTuneOp {
     @Override
     protected RobotCfg createRobotCfg() {

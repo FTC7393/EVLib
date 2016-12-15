@@ -5,4 +5,4 @@ The EVLib library contains many of our helper classes that are used to drive the
 
 The state-machine-framework was a general purpose framework with no platform specific code.
 
-Please check the [wiki](https://github.com/FTC7393/EVLib/wiki) for information on how to use the project. Expect frequent updates to this page and the wiki as this project's documentation is very incomplete.
+Please check the [wiki](https://github.com/FTC7393/EVLib/wiki) for information on how to use the project. Expect frequent updates to this page and the wiki as this project's documentation is incomplete.

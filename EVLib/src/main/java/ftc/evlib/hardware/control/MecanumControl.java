@@ -44,7 +44,17 @@ public class MecanumControl {
      * @param mecanumMotors the motors to control
      */
     public MecanumControl(MecanumMotors mecanumMotors) {
-        this(mecanumMotors, RotationControls.zero(), TranslationControls.zero());
+        this(mecanumMotors, XYRControls.ZERO);
+    }
+
+    /**
+     * create a MecanumControl and immediately start using an XYR control
+     *
+     * @param mecanumMotors the motors to control
+     * @param xyrControl    how to command the motors' rotation and translation
+     */
+    public MecanumControl(MecanumMotors mecanumMotors, XYRControl xyrControl) {
+        this(mecanumMotors, xyrControl, xyrControl);
     }
 
     /**
@@ -104,12 +114,22 @@ public class MecanumControl {
     }
 
     /**
+     * Set both translation and rotation controls to the same object
+     *
+     * @param xyrControl the controller that determines both the translation and rotation
+     */
+    public void setControl(XYRControl xyrControl) {
+        this.translationControl = xyrControl;
+        this.rotationControl = xyrControl;
+    }
+
+    /**
      * stop the motors
      */
-    public void stopMotors() {
-        translationControl = TranslationControls.zero();
-        rotationControl = RotationControls.zero();
-        mecanumMotors.stopMotors();
+    public void stop() {
+        translationControl = TranslationControls.ZERO;
+        rotationControl = RotationControls.ZERO;
+        mecanumMotors.stop();
     }
 
     /**
@@ -126,16 +146,22 @@ public class MecanumControl {
      */
     public void act() {
         translationWorked = translationControl.act();
-        rotationWorked = rotationControl.act();
+
+        //in case the same object is passed in that implements both controllers
+        if (translationControl == rotationControl) {
+            rotationWorked = translationWorked;
+        } else {
+            rotationWorked = rotationControl.act();
+        }
 
         Vector2D translation = translationControl.getTranslation();
 
         double velocity = translation.getLength();
-        double direction = translation.getDirection().radians() +
+        double directionRads = translation.getDirection().radians() +
                 rotationControl.getPolarDirectionCorrection().radians();
 
-        velocityX = velocity * Math.cos(direction);
-        velocityY = velocity * Math.sin(direction);
+        velocityX = velocity * Math.cos(directionRads);
+        velocityY = velocity * Math.sin(directionRads);
 
         velocityR = rotationControl.getVelocityR();
 
@@ -146,6 +172,7 @@ public class MecanumControl {
         );
 
         mecanumMotors.mecanumDrive();
+        mecanumMotors.update();
     }
 
     /**
@@ -181,5 +208,13 @@ public class MecanumControl {
      */
     public double getVelocityR() {
         return velocityR;
+    }
+
+    public RotationControl getRotationControl() {
+        return rotationControl;
+    }
+
+    public TranslationControl getTranslationControl() {
+        return translationControl;
     }
 }

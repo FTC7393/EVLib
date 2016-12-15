@@ -327,7 +327,7 @@ public class EVEndConditions extends EndConditions {
     /**
      * Wait for a distance sensor to be less than a certain distance
      *
-     * @param distanceSensor the distanc sensor
+     * @param distanceSensor the distance sensor
      * @param target         the target Distance
      * @return the created State
      * @see DistanceSensor
@@ -339,7 +339,7 @@ public class EVEndConditions extends EndConditions {
     /**
      * Wait for a distance sensor to be greater than a certain distance
      *
-     * @param distanceSensor the distanc sensor
+     * @param distanceSensor the distance sensor
      * @param target         the target Distance
      * @return the created State
      * @see DistanceSensor

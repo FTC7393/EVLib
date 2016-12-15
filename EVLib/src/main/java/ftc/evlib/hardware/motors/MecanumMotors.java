@@ -14,7 +14,7 @@ import static ftc.evlib.driverstation.Telem.telemetry;
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 12/27/15
- * <p>
+ *
  * A subclass of FourMotors that contains algorithms for controlling mecanum wheels.
  * It stores the X, Y, and R velocities and sends them to the motors when it is updated.
  *
@@ -41,11 +41,10 @@ public class MecanumMotors extends FourMotors {
      * @param backLeftMotor   the back left motor
      * @param backRightMotor  the back right motor
      * @param useSpeedMode    whether or not to use speed control on the motors
-     * @param stopBehavior    what to do when the motors are turned off
      * @param maxRobotSpeed   the measured speed of the robot at 100% power
      */
-    public MecanumMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {
-        super(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor, useSpeedMode, stopBehavior, maxRobotSpeed);
+    public MecanumMotors(Motor frontLeftMotor, Motor frontRightMotor, Motor backLeftMotor, Motor backRightMotor, boolean useSpeedMode, Velocity maxRobotSpeed) {
+        super(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor, useSpeedMode, maxRobotSpeed);
     }
 
     /**
@@ -127,7 +126,7 @@ public class MecanumMotors extends FourMotors {
             telemetry.addData("valuesScaled(" + i + ")", valuesScaled.get(i));
         }
 
-        runMotors(valuesScaled);
+        run(valuesScaled);
     }
 
     /**
@@ -188,7 +187,7 @@ public class MecanumMotors extends FourMotors {
     }
 
     /**
-     * set the x and y velocities using polar coordinates, and also set the ratational velocity
+     * set the x and y velocities using polar coordinates, and also set the rotational velocity
      *
      * @param velocity  the velocity (r of the polar coordinate)
      * @param direction the direction (theta of the polar coordinate)

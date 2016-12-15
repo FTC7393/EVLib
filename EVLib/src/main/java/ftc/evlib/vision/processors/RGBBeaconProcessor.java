@@ -2,6 +2,8 @@ package ftc.evlib.vision.processors;
 
 import android.util.Log;
 
+import com.google.common.collect.ImmutableList;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ftc.evlib.util.FileUtil;
 import ftc.evlib.util.StepTimer;
 import ftc.evlib.vision.ImageUtil;
 
@@ -126,6 +129,14 @@ public class RGBBeaconProcessor implements ImageProcessor<BeaconResult> {
 
         int[] data = new int[3];
 
+        //used for logging the column sum
+        int[][] colSum1 = new int[hsv.width()][4];
+
+        //column
+        for (int x = 0; x < hsv.width(); x++) {
+            colSum1[x][0] = x;
+        }
+
         //loop through the rgb channels
         for (int i = 0; i < 3; i++) {
             //apply HSV thresholds
@@ -137,6 +148,12 @@ public class RGBBeaconProcessor implements ImageProcessor<BeaconResult> {
 
             //apply a column sum to the (unscaled) binary image
             Core.reduce(maskedImage, colSum, 0, Core.REDUCE_SUM, 4);
+
+            //retrieve values to log the column sum
+            for (int x = 0; x < hsv.width(); x++) {
+                colSum.get(0, x, data);
+                colSum1[x][i + 1] = data[0];
+            }
 
             //loop through left and right to calculate mass and center of mass
             for (int j = 0; j < 2; j++) {
@@ -164,6 +181,9 @@ public class RGBBeaconProcessor implements ImageProcessor<BeaconResult> {
                 }
             }
         }
+
+        ImageUtil.log2DArray(FileUtil.getLogsDir(), "RGBColSum", startTime, ".csv", ImmutableList.of("column", "red", "green", "blue"), colSum1);
+
         //merge the 3 binary images into one
         rgbaChannels.add(Mat.zeros(hsv.size(), CvType.CV_8UC1));
         Core.merge(rgbaChannels, rgbaFrame);

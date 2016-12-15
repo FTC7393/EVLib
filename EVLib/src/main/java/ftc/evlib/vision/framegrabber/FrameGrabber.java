@@ -20,11 +20,11 @@ public interface FrameGrabber {
     /**
      * Whether to grab one, all, or no frames, or throw away the frames
      */
-    enum FrameGrabberMode {
-        SINGLE,
-        CONTINUOUS,
-        THROWAWAY,
-        STOPPED
+    enum Mode {
+        SINGLE, //grab one frame, then stop
+        CONTINUOUS, //grab all frames that are available
+        THROWAWAY, //throw away all frames that are given
+        STOPPED //wait for a frame grab request
     }
 
     /**
@@ -66,7 +66,7 @@ public interface FrameGrabber {
     /**
      * @return the mode the FrameGrabber is in
      */
-    FrameGrabberMode getMode();
+    Mode getMode();
 
     /**
      * @param cameraOrientation the orientation of the camera on the robot
@@ -109,7 +109,7 @@ public interface FrameGrabber {
     void stopFrameGrabber();
 
     /**
-     * @return whetheror not the result from the current ImageProcessor is ready
+     * @return whether or not the result from the current ImageProcessor is ready
      */
     boolean isResultReady();
 

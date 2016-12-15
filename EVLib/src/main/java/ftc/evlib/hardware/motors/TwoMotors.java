@@ -13,15 +13,15 @@ import ftc.electronvolts.util.units.Velocity;
  * @see NMotors
  */
 public class TwoMotors extends NMotors {
-    public TwoMotors(Motor leftMotor, Motor rightMotor, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {
-        super(ImmutableList.of(leftMotor, rightMotor), useSpeedMode, stopBehavior, maxRobotSpeed);
+    public TwoMotors(Motor leftMotor, Motor rightMotor, boolean useSpeedMode, Velocity maxRobotSpeed) {
+        super(ImmutableList.of(leftMotor, rightMotor), useSpeedMode, maxRobotSpeed);
     }
 
     public void runMotorsNormalized(double leftValue, double rightValue) {
-        runMotorsNormalized(ImmutableList.of(leftValue, rightValue));
+        runNormalized(ImmutableList.of(leftValue, rightValue));
     }
 
     public void runMotors(double leftValue, double rightValue) {
-        runMotors(ImmutableList.of(leftValue, rightValue));
+        run(ImmutableList.of(leftValue, rightValue));
     }
 }

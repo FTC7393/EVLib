@@ -3,10 +3,12 @@ package ftc.evlib.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import ftc.electronvolts.util.MatchTimer;
+import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Time;
 import ftc.evlib.driverstation.Telem;
 import ftc.evlib.hardware.config.RobotCfg;
 import ftc.evlib.hardware.servos.Servos;
+import ftc.evlib.util.FileUtil;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -15,9 +17,26 @@ import ftc.evlib.hardware.servos.Servos;
  * adds useful features to the OpMode such as a MatchTimer, servo management, use of RobotCfg
  */
 public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
-    public MatchTimer matchTimer; // keeps track of the time left in the match
-    public Servos servos; // coordinates all the servos to act with one command
-    public Type robotCfg; // stores all the motors, servos, and sensors
+    /**
+     * keeps track of the time left in the match
+     */
+    public MatchTimer matchTimer;
+
+    /**
+     * coordinates all the servos to act with one command
+     */
+    public Servos servos;
+
+    /**
+     * logs values to a file
+     */
+    private Logger logger;
+
+    /**
+     * stores all the motors, servos, and sensors
+     */
+    public Type robotCfg;
+
 
     /**
      * This is implemented by the opmode to initialize the hardware
@@ -25,6 +44,13 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
      * @return a RobotCfg of the type specified by your opmode
      */
     protected abstract Type createRobotCfg();
+
+    /**
+     * This is implemented by the opmode to log values
+     *
+     * @return a Logger that has been configured return null for no logging
+     */
+    protected abstract Logger createLogger();
 
     /**
      * This is implemented by the opmode
@@ -82,9 +108,12 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     @Override
     public void init() {
         Telem.telemetry = telemetry; //store the telemetry in a global location
-        matchTimer = new MatchTimer(getMatchTime()); //create the MatchTimer
+
         robotCfg = createRobotCfg(); //ask the OpMode for the HardwareCfg object
         servos = robotCfg.getServos(); //create the servos object
+
+        matchTimer = new MatchTimer(getMatchTime()); //create the MatchTimer
+        logger = createLogger(); //create the logger
 
         setup();
     }
@@ -98,6 +127,8 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     public void start() {
         matchTimer.start(); //start the match
 
+        if (logger != null) logger.start(FileUtil.getLogsDir()); // start the logging
+
         go();
     }
 
@@ -110,9 +141,15 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
         if (matchTimer.isMatchJustOver()) stop();
         if (matchTimer.isMatchOver()) return;
 
-        telemetry.addData("Time left", matchTimer.getTimeLeft() / 1000.0);
+        long timeLeft = matchTimer.getTimeLeft();
+        if (timeLeft > 0) {
+            telemetry.addData("Time left", timeLeft / 1000.0);
+        }
 
         pre_act();
+
+        if (logger != null) logger.act();
+
         act();
         post_act();
 
@@ -123,7 +160,9 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     @Override
     public void stop() {
         robotCfg.stop();
+        robotCfg.getStoppers().stop();
         servos.servosAct(); //update the servos so they will stop
+        if (logger != null) logger.stop();
 
         end();
     }

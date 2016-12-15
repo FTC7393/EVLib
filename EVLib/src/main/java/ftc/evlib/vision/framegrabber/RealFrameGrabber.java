@@ -26,7 +26,7 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  * @see GlobalFrameGrabber
  */
 public class RealFrameGrabber implements FrameGrabber {
-    private FrameGrabberMode mode = FrameGrabberMode.STOPPED;
+    private Mode mode = Mode.STOPPED;
 
     private CameraOrientation cameraOrientation;
     private boolean ignoreOrientationForDisplay, saveImages;
@@ -60,7 +60,7 @@ public class RealFrameGrabber implements FrameGrabber {
     private ImageProcessor imageProcessor = null;
 
     /**
-     * The object to store the result from the ImagezProcessor
+     * The object to store the result from the ImageProcessor
      */
     private ImageProcessorResult result = null;
 
@@ -126,7 +126,7 @@ public class RealFrameGrabber implements FrameGrabber {
     }
 
     @Override
-    public FrameGrabberMode getMode() {
+    public Mode getMode() {
         return mode;
     }
 
@@ -162,26 +162,26 @@ public class RealFrameGrabber implements FrameGrabber {
     @Override
     public void grabSingleFrame() {
         if (isImageProcessorNull()) return;
-        mode = FrameGrabberMode.SINGLE;
+        mode = Mode.SINGLE;
         resultReady = false;
     }
 
     @Override
     public void grabContinuousFrames() {
         if (isImageProcessorNull()) return;
-        mode = FrameGrabberMode.CONTINUOUS;
+        mode = Mode.CONTINUOUS;
         resultReady = false;
     }
 
     @Override
     public void throwAwayFrames() {
-        mode = FrameGrabberMode.THROWAWAY;
+        mode = Mode.THROWAWAY;
         resultReady = false;
     }
 
     @Override
     public void stopFrameGrabber() {
-        mode = FrameGrabberMode.STOPPED;
+        mode = Mode.STOPPED;
         totalTime = 0;
         loopCount = 0;
         loopTimer = 0;
@@ -206,24 +206,24 @@ public class RealFrameGrabber implements FrameGrabber {
     @Override
     public Mat receiveFrame(Mat inputFrame) {
         //throw frames away instead of stopping if that behavior has been requested
-        if (throwAway && mode == FrameGrabberMode.STOPPED) {
-            mode = FrameGrabberMode.THROWAWAY;
+        if (throwAway && mode == Mode.STOPPED) {
+            mode = Mode.THROWAWAY;
         }
-        if (mode == FrameGrabberMode.SINGLE) { //if a single frame was requested
+        if (mode == Mode.SINGLE) { //if a single frame was requested
             processFrame(inputFrame); //process it
             stopFrameGrabber(); //and stop grabbing
             resultReady = true;
-        } else if (mode == FrameGrabberMode.CONTINUOUS) { //if in continuous mode
+        } else if (mode == Mode.CONTINUOUS) { //if in continuous mode
             resultReady = false;
             processFrame(inputFrame); //process and stay in continuous mode
             resultReady = true;
-        } else if (mode == FrameGrabberMode.THROWAWAY) { //if throwing away frames
+        } else if (mode == Mode.THROWAWAY) { //if throwing away frames
             return blank;
-        } else if (mode == FrameGrabberMode.STOPPED) { //if stopped
+        } else if (mode == Mode.STOPPED) { //if stopped
             //wait for a frame request from the main program
             //in the meantime hang to avoid grabbing extra frames and wasting battery
             resultReady = true;
-            while (mode == FrameGrabberMode.STOPPED) {
+            while (mode == Mode.STOPPED) {
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
@@ -247,7 +247,7 @@ public class RealFrameGrabber implements FrameGrabber {
             return;
         }
         //start the loop timer
-        if (mode == FrameGrabberMode.SINGLE) {
+        if (mode == Mode.SINGLE) {
             loopTimer = System.nanoTime();
         }
         long frameTime = System.currentTimeMillis();

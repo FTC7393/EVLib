@@ -14,18 +14,10 @@ public interface Motor {
     /**
      * The different modes the motor can be in
      */
-    enum MotorMode {
+    enum Mode {
         POWER, //directly control the power
         SPEED, //enable a feedback loop to correct speed (requires encoders)
-        POSITION //turn the motor towards a certain encoder position (required encoders)
-    }
-
-    /**
-     * What to do when the motor is stopped
-     */
-    enum StopBehavior {
-        BRAKE, //keep the motor from turning further
-        FLOAT //let the motor turn freely
+        POSITION //turn the motor to a certain encoder position (requires encoders)
     }
 
     /**
@@ -40,12 +32,10 @@ public interface Motor {
      *
      * @return the current mode
      */
-    MotorMode getMode();
+    Mode getMode();
 
     /**
-     * Tell the motor to brake or float when it stops
-     *
-     * @param stopBehavior what to do when the motor is stopped
+     * Sends motor commands to the motor controller
      */
-    void setStopBehavior(StopBehavior stopBehavior);
+    void update();
 }

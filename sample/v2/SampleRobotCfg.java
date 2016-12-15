@@ -2,11 +2,11 @@ package org.firstinspires.ftc.teamcode.sample.v2;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import ftc.electronvolts.statemachine.StateName;
 import ftc.electronvolts.util.units.Distance;
 import ftc.electronvolts.util.units.Time;
 import ftc.electronvolts.util.units.Velocity;
 import ftc.evlib.hardware.config.RobotCfg;
-import ftc.evlib.hardware.motors.Motor;
 import ftc.evlib.hardware.motors.Motors;
 import ftc.evlib.hardware.motors.TwoMotors;
 
@@ -23,7 +23,7 @@ public class SampleRobotCfg extends RobotCfg {
      * the speed of the robot at 100% power
      * you should replace this with a measured value
      */
-    public static final Velocity MAX_SPEED = new Velocity(Distance.fromInches(50), Time.fromSeconds(5));
+    private static final Velocity MAX_SPEED = new Velocity(Distance.fromInches(50), Time.fromSeconds(5));
 
     /**
      * the drive motors of the robot
@@ -36,18 +36,16 @@ public class SampleRobotCfg extends RobotCfg {
         // create the twoMotors object
         twoMotors = new TwoMotors(
                 //get the left and right motors and wrap it with the EVLib Motor interface
-                Motors.motorWithoutEncoderForward(hardwareMap.dcMotor.get("leftMotor")),
-                Motors.motorWithoutEncoderReversed(hardwareMap.dcMotor.get("rightMotor")),
-                //true for speed mode, false for power mode
-                false,
-                //brake the motors when they are stopped
-                Motor.StopBehavior.BRAKE,
+                Motors.withoutEncoder(hardwareMap, "leftMotor", false, true, stoppers),
+                Motors.withoutEncoder(hardwareMap, "rightMotor", true, true, stoppers),
+                false, //true for speed mode, false for power mode
                 MAX_SPEED
         );
     }
 
     /**
      * gives the opmodes access to the drive motors
+     *
      * @return the drive motors
      */
     public TwoMotors getTwoMotors() {
@@ -62,5 +60,9 @@ public class SampleRobotCfg extends RobotCfg {
     @Override
     public void stop() {
 
+    }
+
+    public SampleStateMachineBuilder createSampleStateMachineBuilder(StateName firstStateName) {
+        return new SampleStateMachineBuilder(firstStateName, twoMotors);
     }
 }

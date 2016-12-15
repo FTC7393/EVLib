@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.HashMap;
 import java.util.Map;
 
-import ftc.electronvolts.util.OptionsFile;
-import ftc.evlib.util.FileUtil;
+import ftc.electronvolts.util.files.OptionsFile;
+import ftc.evlib.util.EVConverters;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -43,18 +43,12 @@ public class ServoControl {
         this.servo = servo;
         this.name = name;
 
-        OptionsFile optionsFile = new OptionsFile(FileUtil.getFile(ServoCfg.getServoFilename(name)));
+        OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), ServoCfg.getServoFile(name));
 
         presets = new HashMap<>();
 
         for (Enum preset : name.getPresets()) {
-
-            double servoPosition = 0.5;
-            try {
-                servoPosition = optionsFile.getAsDouble(preset.name(), servoPosition);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
+            double servoPosition = optionsFile.get(preset.name(), 0.5);
             presets.put(preset, servoPosition);
         }
         targetPosition = presets.get(startPreset);

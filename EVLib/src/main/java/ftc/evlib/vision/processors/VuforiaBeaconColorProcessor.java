@@ -20,9 +20,9 @@ import java.util.Map;
 import ftc.electronvolts.util.Utility;
 import ftc.electronvolts.util.Vector2D;
 import ftc.evlib.vision.ImageUtil;
-import ftc.evlib.vision.framegrabber.VuforiaFrameGrabberInit;
+import ftc.evlib.vision.framegrabber.VuforiaFrameFeeder;
 
-import static ftc.evlib.vision.framegrabber.VuforiaFrameGrabberInit.beacons;
+import static ftc.evlib.vision.framegrabber.VuforiaFrameFeeder.beacons;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -31,15 +31,15 @@ import static ftc.evlib.vision.framegrabber.VuforiaFrameGrabberInit.beacons;
 
 public class VuforiaBeaconColorProcessor implements ImageProcessor<BeaconColorResult> {
     private static final String TAG = "VuforiaBeaconColor";
-    private final VuforiaFrameGrabberInit vuforia;
-    private final CroppedBeaconProcessor beaconProcessor = new CroppedBeaconProcessor(15, 15); //(51, 76);
+    private final VuforiaFrameFeeder vuforia;
+    private final RedBlueBeaconProcessor beaconProcessor = new RedBlueBeaconProcessor(50, 100); //(5, 25); //(15, 15); //(51, 76);
     private int resultsFound = 0;
     private final List<BeaconColorResult> results = new ArrayList<>();
 
-    //                                              tl     tr     bl     br
-    private static final double[] beaconXOffset = {0, 0, 0, 0}; //the units are "beacon picture widths"
-    //    private static final double[] beaconXOffset = {+0.10, -0.10, +0.10, -0.10}; //the units are "beacon picture widths"
-    private static final double[] beaconYOffset = {-1.00, -1.00, -1.14, -1.14}; //the units are "beacon picture heights"
+    //the units are "beacon picture widths"         tl     tr     bl     br
+    private static final double[] beaconXOffset = {+0.00, +0.00, +0.00, +0.00};
+    //    private static final double[] beaconXOffset = {+0.10, -0.10, +0.10, -0.10};
+    private static final double[] beaconYOffset = {-1.00, -1.00, -1.14, -1.14};
 
     private BeaconName beaconName = BeaconName.WHEELS;
 
@@ -52,7 +52,7 @@ public class VuforiaBeaconColorProcessor implements ImageProcessor<BeaconColorRe
         results.clear();
     }
 
-    public VuforiaBeaconColorProcessor(VuforiaFrameGrabberInit vuforia) {
+    public VuforiaBeaconColorProcessor(VuforiaFrameFeeder vuforia) {
         this.vuforia = vuforia;
     }
 

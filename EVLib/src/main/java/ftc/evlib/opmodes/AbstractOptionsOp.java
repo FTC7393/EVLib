@@ -1,8 +1,10 @@
 package ftc.evlib.opmodes;
 
-import ftc.electronvolts.util.OptionsFile;
+import ftc.electronvolts.util.files.Logger;
+import ftc.electronvolts.util.files.OptionsFile;
 import ftc.electronvolts.util.units.Time;
 import ftc.evlib.hardware.config.RobotCfg;
+import ftc.evlib.util.EVConverters;
 import ftc.evlib.util.FileUtil;
 
 /**
@@ -15,8 +17,8 @@ import ftc.evlib.util.FileUtil;
  * @see OptionsFile
  */
 public abstract class AbstractOptionsOp extends AbstractTeleOp<RobotCfg> {
-    public OptionsFile optionsFile;
     private final String filename;
+    public OptionsFile optionsFile;
 
     /**
      * The filename will be set by the subclasses
@@ -46,48 +48,35 @@ public abstract class AbstractOptionsOp extends AbstractTeleOp<RobotCfg> {
     }
 
     @Override
+    protected Logger createLogger() {
+        //the OptionsOp has no logging
+        return null;
+    }
+
+    @Override
     public Time getMatchTime() {
-        return null; //the OptionsOp has no time limit
+        //the OptionsOp has no time limit
+        return null;
     }
 
     /**
      * Load the options from the file
      */
     public void loadOptionsFile() {
-        optionsFile = new OptionsFile(FileUtil.getFile(filename));
+        optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile(filename));
     }
 
     /**
      * save the options from the file
      */
     public void saveOptionsFile() {
-        optionsFile.writeToFile(FileUtil.getFile(filename));
-    }
-
-    @Override
-    public void post_act() {
-        super.post_act();
-
-        telemetry.addData("* back button => erase changes", "");
-//        telemetry.addData("* Hit the \"Back\" button to erase changes since the last save (reload the options file).", "");
-
-        if (driver1.back.justPressed()) {
-            loadOptionsFile();
-        }
-
-        telemetry.addData("* start button => save", "");
-//        telemetry.addData("* Hit \"Start\" to save the options.", "");
-        if (driver1.start.justPressed()) {
-            saveOptionsFile();
-        }
-
-        telemetry.addData("* Stop the opmode to save and quit.", "");
-//        telemetry.addData("* Hit \"Stop\" on the driver station to save the options and quit.", "");
+        optionsFile.writeToFile(FileUtil.getOptionsFile(filename));
     }
 
     @Override
     protected void setup() {
-        loadOptionsFile(); //load the file when the opmode starts
+        //load the file when the opmode starts
+        loadOptionsFile();
     }
 
     @Override
@@ -101,7 +90,25 @@ public abstract class AbstractOptionsOp extends AbstractTeleOp<RobotCfg> {
     }
 
     @Override
+    public void post_act() {
+        super.post_act();
+
+        //display telemetry instructions
+        telemetry.addData("* back button => erase changes", "");
+        //reload the file if the back button is pressed
+        if (driver1.back.justPressed()) loadOptionsFile();
+
+        //display telemetry instructions
+        telemetry.addData("* start button => save", "");
+        //save the file if the start button is pressed
+        if (driver1.start.justPressed()) saveOptionsFile();
+
+        telemetry.addData("* Stop the opmode to save and quit.", "");
+    }
+
+    @Override
     protected void end() {
-        saveOptionsFile(); //save the file when the opmode ends
+        //save the file when the opmode ends
+        saveOptionsFile();
     }
 }

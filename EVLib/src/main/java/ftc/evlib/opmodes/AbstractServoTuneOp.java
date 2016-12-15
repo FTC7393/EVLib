@@ -1,21 +1,19 @@
 package ftc.evlib.opmodes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.Functions;
-import ftc.electronvolts.util.OptionsFile;
 import ftc.electronvolts.util.Utility;
+import ftc.electronvolts.util.files.Logger;
+import ftc.electronvolts.util.files.OptionsFile;
 import ftc.electronvolts.util.units.Time;
 import ftc.evlib.hardware.config.RobotCfg;
 import ftc.evlib.hardware.servos.ServoCfg;
 import ftc.evlib.hardware.servos.ServoControl;
 import ftc.evlib.hardware.servos.ServoName;
-import ftc.evlib.util.FileUtil;
+import ftc.evlib.util.EVConverters;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -38,9 +36,9 @@ import ftc.evlib.util.FileUtil;
  *
  * <code>
  *
- * @TeleOp(name = "MyRobot ServoTuneOp")
+ * \@TeleOp(name = "MyRobot ServoTuneOp")
  * public class MyRobotServoTuneOp extends AbstractServoTuneOp {
- * @Override protected RobotCfg createRobotCfg() {
+ * \@Override protected RobotCfg createRobotCfg() {
  * return new MyRobotCfg(hardwareMap);
  * }
  * }
@@ -53,6 +51,7 @@ import ftc.evlib.util.FileUtil;
  * Press start to save the current preset of the current servo to the current value.
  *
  * The presets are saved in files that are retrieved when you run other opmodes to find the value of each preset.
+ *
  * @see ServoControl
  * @see ServoCfg
  */
@@ -70,7 +69,12 @@ public abstract class AbstractServoTuneOp extends AbstractTeleOp<RobotCfg> {
     /**
      * records whether or not a new servo has been selected
      */
-    private boolean servoIndexJustChanged = true;
+    private boolean servoIndexChanged = true;
+
+    /**
+     * records whether or not a new servo preset has been selected
+     */
+    private boolean servoPresetIndexChanged = true;
 
     /**
      * The list of current positions for each servo
@@ -80,12 +84,7 @@ public abstract class AbstractServoTuneOp extends AbstractTeleOp<RobotCfg> {
     /**
      * The list of servo names
      */
-    private ServoName[] servoNames;
-
-    /**
-     * The map that connects the presets to the values
-     */
-    private Map<Enum, Double> presetMap;
+    private List<ServoName> servoNames;
 
     /**
      * The list of preset names for the current servo
@@ -95,12 +94,7 @@ public abstract class AbstractServoTuneOp extends AbstractTeleOp<RobotCfg> {
     /**
      * The list of preset values for the current servo
      */
-    private List<Double> presets;
-
-    /**
-     * The current servo's name
-     */
-    private ServoName servoName;
+    private List<Double> presetValues;
 
     /**
      * The current servo
@@ -123,21 +117,21 @@ public abstract class AbstractServoTuneOp extends AbstractTeleOp<RobotCfg> {
         return null;
     }
 
+    /**
+     * @return no logging
+     */
+    @Override
+    protected Logger createLogger() {
+        return null;
+    }
+
     @Override
     protected void setup() {
-//        servoNames = (ServoName[]) robotCfg.getServos().getServoMap().keySet().toArray();
-        Set<ServoName> servoNameSet = robotCfg.getServos().getServoMap().keySet();
-        servoNames = servoNameSet.toArray(new ServoName[servoNameSet.size()]);
+        //get a list of servo names from the RobotCfg
+        servoNames = robotCfg.getServos().getServoNames();
 
-//        servoNames = TestRobotCfg.TestBotServoName.values();
-//        Map<ServoName, Enum> servoStartPresetMap = ServoCfg.defaultServoStartPresetMap(servoNames);
-        for (ServoName servoName : servoNames) {
-//            Enum startPreset = servoStartPresetMap.get(servoName);
-//
-//            OptionsFile optionsFile = OptionsFile.fromFile(ServoCfg.getServoFilename(servoName));
-//            double servoPosition = optionsFile.getAsDouble(startPreset.name(), 0.5);
-//
-//            servoPositions.add(servoPosition);
+        //add servo positions to be the same length as servoNames
+        for (ServoName ignored : servoNames) {
             servoPositions.add(0.5);
         }
     }
@@ -154,73 +148,94 @@ public abstract class AbstractServoTuneOp extends AbstractTeleOp<RobotCfg> {
 
     @Override
     protected void act() {
-        //TODO add comments to AbstractServoTuneOp.act()
+
+
+        //if dpad up is pressed
         if (driver1.dpad_up.justPressed() || driver2.dpad_up.justPressed()) {
-            servoIndex += 1;
-            servoIndexJustChanged = true;
+            servoIndex += 1; //move to the next servo
+            //wrap around if the index is too large
+            if (servoIndex > servoNames.size() - 1) servoIndex = 0;
+            servoIndexChanged = true; //signal that the index changed
         }
+
+        //if dpad down is pressed
         if (driver1.dpad_down.justPressed() || driver2.dpad_down.justPressed()) {
-            servoIndex -= 1;
-            servoIndexJustChanged = !servoIndexJustChanged;
+            servoIndex -= 1; //move to the previous servo
+            //wrap around if the index is too small
+            if (servoIndex < 0) servoIndex = servoNames.size() - 1;
+            servoIndexChanged = true; //signal that the index changed
         }
 
-        int numServos = robotCfg.getServos().getServoMap().size();
-        if (servoIndex > numServos - 1) servoIndex = 0;
-        if (servoIndex < 0) servoIndex = servoNames.length - 1;
+        //if a different servo was selected
+        if (servoIndexChanged) {
+            servoIndexChanged = false;
 
-        if (servoIndexJustChanged) {
-            servoIndexJustChanged = false;
+            servo = robotCfg.getServo(servoNames.get(servoIndex));//get the servo
+            presetNames = new ArrayList<>(servo.getPresets().keySet()); //get the preset names from the servo
+            presetValues = new ArrayList<>(servo.getPresets().values()); //get the presets from the servo
 
-            servoName = servoNames[servoIndex];
-            servo = robotCfg.getServo(servoName);
-
-            presetMap = servo.getPresets();
-            presetNames = new ArrayList<>(presetMap.keySet());
-            presets = new ArrayList<>(presetMap.values());
-            servoPositions.set(servoIndex, presets.get(presetIndex));
+            presetIndex = 0; //start at the first preset for the new servo
+            servoPresetIndexChanged = true; //signal to reload the servo preset
         }
 
+        //get the servo position
+        double servoPosition = servoPositions.get(servoIndex);
+
+        //if the dpad left was just pressed
         if (driver1.dpad_left.justPressed() || driver2.dpad_left.justPressed()) {
-            presetIndex -= 1;
-            if (presetIndex < 0) presetIndex = presets.size() - 1;
-            servoPositions.set(servoIndex, presets.get(presetIndex));
+            presetIndex -= 1; //select the previous servo preset
+            //wrap around if the index is too small
+            if (presetIndex < 0) presetIndex = presetValues.size() - 1;
+            servoPresetIndexChanged = true; //signal that the index changed
         }
+
+        //if the dpad right was just pressed
         if (driver1.dpad_right.justPressed() || driver2.dpad_right.justPressed()) {
-            presetIndex += 1;
-            if (presetIndex > presets.size() - 1) presetIndex = 0;
-            servoPositions.set(servoIndex, presets.get(presetIndex));
+            presetIndex += 1; //select the next servo preset
+            //wrap around if the index is too large
+            if (presetIndex > presetValues.size() - 1) presetIndex = 0;
+            servoPresetIndexChanged = true; //signal that the index changed
+        }
+
+        //is the servo preset index changed
+        if (servoPresetIndexChanged) {
+            servoPresetIndexChanged = false;
+            servoPosition = presetValues.get(presetIndex); //set the servo to the preset position
         }
 
         telemetry.addData("Press start to set the current preset to the current value", "");
+        //if start is pressed, save the current preset to a file
         if (driver1.start.justPressed() || driver2.start.justPressed()) {
-            presets.set(presetIndex, servoPositions.get(servoIndex));
-            Map<String, String> presetStringMap = new HashMap<>();
-            int i = 0;
-            for (Map.Entry<Enum, Double> entry : presetMap.entrySet()) {
-//                presetStringMap.put(entry.getKey().toString(), entry.getValue().toString());
-                presetStringMap.put(entry.getKey().toString(), presets.get(i).toString());
-                presetMap.put(entry.getKey(), presets.get(i));
-                i++;
+            //set the current selected preset to the current servo position
+            servo.getPresets().put(presetNames.get(presetIndex), servoPosition);
+            presetValues.set(presetIndex, servoPosition);
+
+            OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance()); //create an OptionsFile
+
+            //put the preset names and presets into the OptionsFile
+            for (int i = 0; i < presetNames.size(); i++) {
+                optionsFile.set(presetNames.get(i).name(), presetValues.get(i).toString());
             }
-            OptionsFile optionsFile = new OptionsFile(presetStringMap);
-            optionsFile.writeToFile(FileUtil.getFile(ServoCfg.getServoFilename(servoName)));
+
+            optionsFile.writeToFile(ServoCfg.getServoFile(servoNames.get(servoIndex))); //store the OptionsFile to a file
         }
 
-        telemetry.addData("Servo Name", servoName);
+        //modify the servo position using the joysticks
+        servoPosition += 2e-4 * matchTimer.getDeltaTime() * (driver1.left_stick_y.getValue() + 0.1 * driver1.right_stick_y.getValue() + driver2.left_stick_y.getValue() + 0.1 * driver2.right_stick_y.getValue());
 
-        double servoPos = servoPositions.get(servoIndex);
+        //limit the position
+        servoPosition = Utility.servoLimit(servoPosition);
 
-        servoPos += 0.01 * (
-                driver1.left_stick_y.getValue() + 0.1 * driver1.right_stick_y.getValue() +
-                        driver2.left_stick_y.getValue() + 0.1 * driver2.right_stick_y.getValue()
-        );
-        servoPos = Utility.servoLimit(servoPos);
-        servo.setPosition(servoPos);
+        //set the servo to the position
+        servo.setPosition(servoPosition);
 
-        servoPositions.set(servoIndex, servoPos);
+        //store the position
+        servoPositions.set(servoIndex, servoPosition);
 
-        telemetry.addData("servo preset name", presetNames.get(presetIndex));
-        telemetry.addData("servo preset value", servoPos);
+        //display telemetry about the servo
+        telemetry.addData("Servo Name", servoNames.get(servoIndex));
+        telemetry.addData("Servo Preset Name", presetNames.get(presetIndex));
+        telemetry.addData("Servo Preset Value", servoPosition);
     }
 
     @Override

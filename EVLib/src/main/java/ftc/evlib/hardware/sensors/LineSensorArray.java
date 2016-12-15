@@ -14,7 +14,7 @@ public interface LineSensorArray {
     /**
      * Should be called every time in the loop
      */
-    void update();
+    boolean update();
 
     /**
      * @return the value at position i
@@ -36,5 +36,5 @@ public interface LineSensorArray {
      *
      * the values should range from -1 to 1
      */
-    double getCenterOfMass();
+    double getCentroid();
 }

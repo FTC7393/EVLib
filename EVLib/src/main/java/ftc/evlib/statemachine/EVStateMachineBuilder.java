@@ -7,18 +7,16 @@ import java.util.List;
 import ftc.electronvolts.statemachine.StateMachineBuilder;
 import ftc.electronvolts.statemachine.StateName;
 import ftc.electronvolts.statemachine.Transition;
-import ftc.electronvolts.util.ResultReceiver;
 import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Distance;
 import ftc.evlib.hardware.control.MecanumControl;
+import ftc.evlib.hardware.mechanisms.Shooter;
 import ftc.evlib.hardware.sensors.DistanceSensor;
-import ftc.evlib.hardware.sensors.LineSensorArray;
 import ftc.evlib.hardware.servos.ServoControl;
 import ftc.evlib.hardware.servos.ServoName;
 import ftc.evlib.hardware.servos.Servos;
 import ftc.evlib.vision.framegrabber.FrameGrabber;
-import ftc.evlib.vision.processors.BeaconColorResult;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -31,39 +29,42 @@ import ftc.evlib.vision.processors.BeaconColorResult;
  * @see StateMachineBuilder
  */
 public class EVStateMachineBuilder extends StateMachineBuilder {
+    private final TeamColor teamColor;
+    private final Angle tolerance;
     private final MecanumControl mecanumControl;
     private final GyroSensor gyro;
     private final FrameGrabber frameGrabber;
     private final Servos servos;
     private final DistanceSensor distanceSensor;
-    private final LineSensorArray lineSensorArray;
-    private final TeamColor teamColor;
+    private final Shooter shooter;
 
     /**
      * any of the parameters can be null if the robot does not have it
      *
-     * @param firstStateName  the state to start with
-     * @param mecanumControl  the mecanum wheel controller
-     * @param gyro            the gyro sensor
-     * @param frameGrabber    access to the camera
-     * @param servos          the servos
-     * @param distanceSensor  the distance sensor
-     * @param lineSensorArray the line sensor array
-     * @param teamColor       the alliance you are on
+     * @param firstStateName the state to start with
+     * @param teamColor      the alliance you are on
+     * @param tolerance      the tolerance on gyro angles
+     * @param gyro           the gyro sensor
+     * @param frameGrabber   access to the camera
+     * @param servos         the servos
+     * @param distanceSensor the distance sensor
+     * @param mecanumControl the mecanum wheel controller
+     * @param shooter        the helper class for the mecanism that shoots the particles
      */
-    public EVStateMachineBuilder(StateName firstStateName, MecanumControl mecanumControl, GyroSensor gyro, FrameGrabber frameGrabber, Servos servos, DistanceSensor distanceSensor, LineSensorArray lineSensorArray, TeamColor teamColor) {
+    public EVStateMachineBuilder(StateName firstStateName, TeamColor teamColor, Angle tolerance, GyroSensor gyro, FrameGrabber frameGrabber, Servos servos, DistanceSensor distanceSensor, MecanumControl mecanumControl, Shooter shooter) {
         super(firstStateName);
+        this.teamColor = teamColor;
+        this.tolerance = tolerance;
         this.mecanumControl = mecanumControl;
         this.gyro = gyro;
         this.frameGrabber = frameGrabber;
         this.servos = servos;
         this.distanceSensor = distanceSensor;
-        this.lineSensorArray = lineSensorArray;
-        this.teamColor = teamColor;
+        this.shooter = shooter;
     }
 
-    public EVStateMachineBuilder(StateName firstStateName, EVStateMachineBuilder builder) {
-        this(firstStateName, builder.mecanumControl, builder.gyro, builder.frameGrabber, builder.servos, builder.distanceSensor, builder.lineSensorArray, builder.teamColor);
+    public EVStateMachineBuilder(StateName firstStateName, EVStateMachineBuilder b) {
+        this(firstStateName, b.teamColor, b.tolerance, b.gyro, b.frameGrabber, b.servos, b.distanceSensor, b.mecanumControl, b.shooter);
     }
 
 //    public void addCameraTracking(StateName stateName, StateName doneState, StateName lostObjectState, long timeoutMillis, StateName timeoutState, ImageProcessor<? extends Location> imageProcessor) {
@@ -93,14 +94,6 @@ public class EVStateMachineBuilder extends StateMachineBuilder {
         add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, velocity, Angle.fromDegrees(directionDegrees), Angle.fromDegrees(orientationDegrees)));
     }
 
-    public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, double directionDegrees, double orientationDegrees, double maxAngularSpeed) {
-        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, Angle.fromDegrees(directionDegrees), Angle.fromDegrees(orientationDegrees), maxAngularSpeed));
-    }
-
-    public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, double directionDegrees, double orientationDegrees) {
-        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, Angle.fromDegrees(directionDegrees), Angle.fromDegrees(orientationDegrees)));
-    }
-
     public void addDrive(StateName stateName, List<Transition> transitions, double velocity, Angle direction, Angle orientation, double maxAngularSpeed) {
         add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, velocity, direction, orientation, maxAngularSpeed));
     }
@@ -109,18 +102,73 @@ public class EVStateMachineBuilder extends StateMachineBuilder {
         add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, velocity, direction, orientation));
     }
 
+
+    public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, double directionDegrees, double orientationDegrees, double maxAngularSpeed) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, Angle.fromDegrees(directionDegrees), Angle.fromDegrees(orientationDegrees), tolerance, maxAngularSpeed));
+    }
+
+    public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, double directionDegrees, double orientationDegrees) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, Angle.fromDegrees(directionDegrees), Angle.fromDegrees(orientationDegrees), tolerance));
+    }
+
     public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, Angle direction, Angle orientation, double maxAngularSpeed) {
-        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, maxAngularSpeed));
+        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, tolerance, maxAngularSpeed));
     }
 
     public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, Angle direction, Angle orientation) {
-        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation));
+        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, tolerance));
+    }
+
+    public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, Angle direction, Angle orientation, Angle tolerance, double maxAngularSpeed) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, tolerance, maxAngularSpeed));
+    }
+
+    public void addDrive(StateName stateName, StateName nextStateName, Distance distance, double velocity, Angle direction, Angle orientation, Angle tolerance) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, tolerance));
     }
     ///// END DRIVE STATES /////
 
+    ///// START TURN STATES /////
+    public void addGyroTurn(StateName stateName, List<Transition> transitions, double orientationDegrees, double maxAngularSpeed) {
+        add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, 0, Angle.zero(), Angle.fromDegrees(orientationDegrees), maxAngularSpeed));
+    }
+
+    public void addGyroTurn(StateName stateName, List<Transition> transitions, double orientationDegrees) {
+        add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, 0, Angle.zero(), Angle.fromDegrees(orientationDegrees)));
+    }
+
+    public void addGyroTurn(StateName stateName, List<Transition> transitions, Angle orientation, double maxAngularSpeed) {
+        add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, 0, Angle.zero(), orientation, maxAngularSpeed));
+    }
+
+    public void addGyroTurn(StateName stateName, List<Transition> transitions, Angle orientation) {
+        add(EVStates.mecanumDrive(stateName, transitions, mecanumControl, gyro, 0, Angle.zero(), orientation));
+    }
+
+    public void addGyroTurn(StateName stateName, StateName nextStateName, double orientationDegrees, double toleranceDegrees, double maxAngularSpeed) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, Distance.zero(), mecanumControl, gyro, 0, Angle.zero(), Angle.fromDegrees(orientationDegrees), Angle.fromDegrees(toleranceDegrees), maxAngularSpeed));
+    }
+
+    public void addGyroTurn(StateName stateName, StateName nextStateName, double orientationDegrees, double toleranceDegrees) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, Distance.zero(), mecanumControl, gyro, 0, Angle.zero(), Angle.fromDegrees(orientationDegrees), Angle.fromDegrees(toleranceDegrees)));
+    }
+
+    public void addGyroTurn(StateName stateName, StateName nextStateName, Angle orientation, Angle tolerance, double maxAngularSpeed) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, Distance.zero(), mecanumControl, gyro, 0, Angle.zero(), orientation, tolerance, maxAngularSpeed));
+    }
+
+    public void addGyroTurn(StateName stateName, StateName nextStateName, Angle orientation, Angle tolerance) {
+        add(EVStates.mecanumDrive(stateName, nextStateName, Distance.zero(), mecanumControl, gyro, 0, Angle.zero(), orientation, tolerance));
+    }
+    ///// END TURN STATES /////
+
     ///// START SERVO STATES /////
     private ServoControl getServo(ServoName servoName) {
+        if (!servos.getServoMap().containsKey(servoName)) {
+            throw new IllegalArgumentException("ServoName \"" + servoName + "\" was not found in the servoMap");
+        }
         return servos.getServoMap().get(servoName);
+
     }
 
     public void addServo(StateName stateName, StateName nextStateName, ServoName servoName, double position, boolean waitForDone) {
@@ -148,7 +196,11 @@ public class EVStateMachineBuilder extends StateMachineBuilder {
         add(EVStates.telemetry(stateName, message, value));
     }
 
-    public void addBeaconLineUp(StateName stateName, StateName successState, StateName failState, Angle direction, ResultReceiver<BeaconColorResult> beaconColorResult, Distance distance) {
-        add(EVStates.beaconLineUp(stateName, successState, failState, mecanumControl, direction, gyro, distanceSensor, lineSensorArray, teamColor, beaconColorResult, distance));
+//    public void addBeaconLineUp(StateName stateName, StateName successState, StateName failState, Angle direction, ResultReceiver<BeaconColorResult> beaconColorResult, Distance distance) {
+//        add(EVStates.beaconLineUp(stateName, successState, failState, mecanumControl, direction, gyro, distanceSensor, lineSensorArray, teamColor, beaconColorResult, distance));
+//    }
+
+    public void addShoot(StateName stateName, StateName nextStateName, int shots) {
+        add(EVStates.shoot(stateName, nextStateName, shooter, shots));
     }
 }

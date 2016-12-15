@@ -1,6 +1,5 @@
 package ftc.evlib.vision;
 
-import android.os.Environment;
 import android.util.Log;
 
 import org.opencv.core.Core;
@@ -15,8 +14,14 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import ftc.electronvolts.util.Utility;
+import ftc.evlib.util.FileUtil;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -220,13 +225,13 @@ public class ImageUtil {
         Mat bgrMat = new Mat();
         Imgproc.cvtColor(mat, bgrMat, conversionToBGR);
 
-        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File path = FileUtil.getPicturesDir();
         File file = new File(path, time + "_" + fileSuffix + ".png");
 
         if (Imgcodecs.imwrite(file.toString(), bgrMat)) {
             return true;
         } else {
-            Log.e(tag, "FAILED writing image to external storage");
+            Log.e(tag, "FAILED writing image to phone storage");
             return false;
         }
     }
@@ -334,5 +339,33 @@ public class ImageUtil {
                 break;
         }
         return new Scalar(r, g, b);
+    }
+
+    /**
+     * Save a 2D array of values to a log file
+     * Can be used for logging column sums
+     *
+     * @param dir the directory to put the file in
+     * @param fileName the name of the file
+     * @param time the timestamp
+     * @param fileExtension the file's extension (".csv" for example)
+     * @param titles the list of titles of the columns
+     * @param values the 2D array of values to log
+     * @return whether or not the operation worked
+     */
+    public static boolean log2DArray(File dir, String fileName, long time, String fileExtension, List<String> titles, int[][] values) {
+        File file = new File(dir, fileName + time + fileExtension);
+
+        try {
+            PrintStream printStream = new PrintStream(new FileOutputStream(file));
+            printStream.println(Utility.join(titles, "\t"));
+            for (int[] value : values) {
+                printStream.println(Utility.join(value, "\t"));
+            }
+            printStream.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

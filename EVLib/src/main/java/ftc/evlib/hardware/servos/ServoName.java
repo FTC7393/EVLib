@@ -1,5 +1,7 @@
 package ftc.evlib.hardware.servos;
 
+import ftc.evlib.hardware.config.RobotCfg;
+
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/12/16
@@ -24,4 +26,9 @@ public interface ServoName {
      * @return the name for telemetry purposes
      */
     String name();
+
+    /**
+     * @return the subclass of RobotCfg that this servo is associated with
+     */
+    Class<? extends RobotCfg> getRobotCfg();
 }

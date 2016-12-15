@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.Functions;
+import ftc.electronvolts.util.files.Logger;
 import ftc.evlib.opmodes.AbstractTeleOp;
 
 /**
@@ -13,12 +14,13 @@ import ftc.evlib.opmodes.AbstractTeleOp;
  * A sample TeleOp program that will allow you to control 2 motors with the left and right joysticks
  */
 
-@TeleOp(name="SampleTeleOp V1")
+@TeleOp(name = "SampleTeleOp V1")
 public class SampleTeleOp extends AbstractTeleOp<SampleRobotCfg> {
     @Override
     protected Function getJoystickScalingFunction() {
-        //use a squared function for the joystick scaling to allow fine control
-        return Functions.squared();
+        //use an exponentially based function for the joystick scaling to allow fine control
+        return Functions.eBased(5);
+//        return Functions.squared();
 //        return Functions.cubed();
 //        return Functions.none();
     }
@@ -27,6 +29,11 @@ public class SampleTeleOp extends AbstractTeleOp<SampleRobotCfg> {
     protected SampleRobotCfg createRobotCfg() {
         //create and return a SampleRobotCfg for the library to use
         return new SampleRobotCfg(hardwareMap);
+    }
+
+    @Override
+    protected Logger createLogger() {
+        return null;
     }
 
     @Override

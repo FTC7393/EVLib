@@ -22,9 +22,10 @@ public interface MotorEnc extends Motor {
     /**
      * A PID on the motor controller uses the encoder to turn the motor to any encoder position.
      *
-     * @param encoderPosition position in encoder ticks to rotate to
+     * @param encoderTarget      position in encoder ticks to rotate to
+     * @param maxCorrectionPower the max power to run the motor at when turning to the position
      */
-    void setPosition(int encoderPosition);
+    void setPosition(int encoderTarget, double maxCorrectionPower);
 
     /**
      * Set the encoder zero point to the current encoder value

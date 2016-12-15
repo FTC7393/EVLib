@@ -12,7 +12,8 @@ import ftc.electronvolts.util.units.Angle;
  * @see Angle
  */
 public interface RotationControl {
-    double DEFAULT_MAX_ANGULAR_SPEED = 0.8; //0.5;
+    double DEFAULT_MAX_ANGULAR_SPEED = 0.5;
+//    double DEFAULT_MAX_ANGULAR_SPEED = 0.8;
 
     /**
      * update the rotational velocity

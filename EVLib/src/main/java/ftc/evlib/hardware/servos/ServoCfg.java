@@ -3,8 +3,11 @@ package ftc.evlib.hardware.servos;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import ftc.evlib.util.FileUtil;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -17,8 +20,11 @@ import java.util.Map;
  */
 public class ServoCfg {
 
-    public static String getServoFilename(ServoName servoName) {
-        return "servo_" + servoName + ".txt";
+    public static File getServoFile(ServoName servoName) {
+        //ftc7393/configs/RobotCfg/servo_ARM.txt
+        File dir = new File(FileUtil.getConfigsDir(), servoName.getRobotCfg().getName());
+        FileUtil.mkdirsOrThrowException(dir);
+        return new File(dir, "servo_" + servoName + ".txt");
     }
 
     /**

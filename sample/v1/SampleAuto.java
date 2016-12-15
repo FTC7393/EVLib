@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import ftc.electronvolts.statemachine.StateMachine;
 import ftc.electronvolts.statemachine.StateMachineBuilder;
 import ftc.electronvolts.statemachine.StateName;
+import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Distance;
 import ftc.evlib.opmodes.AbstractAutoOp;
 import ftc.evlib.statemachine.EVStates;
@@ -16,7 +17,7 @@ import ftc.evlib.statemachine.EVStates;
  * A sample autonomous that drives forward for 2 feet.
  */
 
-@Autonomous(name="SampleAuto V1")
+@Autonomous(name = "SampleAuto V1")
 public class SampleAuto extends AbstractAutoOp<SampleRobotCfg> {
 
     /**
@@ -34,7 +35,7 @@ public class SampleAuto extends AbstractAutoOp<SampleRobotCfg> {
         StateMachineBuilder b = new StateMachineBuilder(S.DRIVE);
 
         //define the DRIVE state to drive for 2 feet and move to the STOP state
-        b.add(EVStates.drive(S.DRIVE, S.STOP, Distance.fromFeet(2), SampleRobotCfg.MAX_SPEED, robotCfg.getTwoMotors(), 0.5));
+        b.add(EVStates.drive(S.DRIVE, S.STOP, Distance.fromFeet(2), robotCfg.getTwoMotors(), 0.5));
 
         //define the STOP state to be empty (and never exit) so the state machine will stop
         b.addStop(S.STOP);
@@ -46,6 +47,11 @@ public class SampleAuto extends AbstractAutoOp<SampleRobotCfg> {
     @Override
     protected SampleRobotCfg createRobotCfg() {
         return new SampleRobotCfg(hardwareMap);
+    }
+
+    @Override
+    protected Logger createLogger() {
+        return null;
     }
 
     @Override

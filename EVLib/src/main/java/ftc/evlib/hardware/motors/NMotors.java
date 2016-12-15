@@ -18,14 +18,18 @@ import ftc.electronvolts.util.units.Velocity;
  *
  * @see Motor
  * @see MotorEnc
+ * @see OneMotors
  * @see TwoMotors
+ * @see ThreeMotors
  * @see FourMotors
+ * @see FiveMotors
+ * @see SixMotors
  */
 public class NMotors {
     /**
      * the list of motors that are grouped
      */
-    private final List<Motor> motors;
+    private final List<? extends Motor> motors;
 
     /**
      * whether or not to use speed mode on the motors
@@ -38,12 +42,17 @@ public class NMotors {
     private final Velocity maxRobotSpeed;
 
     /**
+     * the values most recently sent to the motors
+     */
+    private final double[] values;
+    private final int[] encoders;
+
+    /**
      * @param motors        the list of motors
      * @param useSpeedMode  true if encoder-regulated speed mode is desired
-     * @param stopBehavior  what to do when the power/speed is 0
      * @param maxRobotSpeed the measured maximum speed of the robot
      */
-    public NMotors(List<Motor> motors, boolean useSpeedMode, Motor.StopBehavior stopBehavior, Velocity maxRobotSpeed) {
+    public NMotors(List<? extends Motor> motors, boolean useSpeedMode, Velocity maxRobotSpeed) {
         //if using speed mode, the motors need to have encoders
         if (useSpeedMode) {
             for (int i = 0; i < motors.size(); i++) {
@@ -55,7 +64,8 @@ public class NMotors {
         this.motors = motors;
         this.useSpeedMode = useSpeedMode;
         this.maxRobotSpeed = maxRobotSpeed.abs();
-        setStopBehavior(stopBehavior);
+        values = new double[motors.size()];
+        encoders = new int[motors.size()];
     }
 
     /**
@@ -70,19 +80,13 @@ public class NMotors {
      *
      * @param stopBehavior what to do when the power/speed is 0
      */
-    public void setStopBehavior(Motor.StopBehavior stopBehavior) {
-        //loop through and set the stop behavior of each motor
-        for (Motor motor : motors) {
-            motor.setStopBehavior(stopBehavior);
-        }
-    }
 
     /**
-     * scale all the motor powers if any one power is above the maximum of 1
+     * scale all the motor values if any one power is above the maximum of 1
      *
      * @param values the powers/speeds to be scaled and then run
      */
-    public void runMotorsNormalized(List<Double> values) {
+    public void runNormalized(List<Double> values) {
         if (values.size() != motors.size()) {
             throw new IllegalArgumentException("Argument 'values' must have the same length as the number of motors.");
         }
@@ -101,13 +105,13 @@ public class NMotors {
             highest = 1;
         }
 
-        //rescale the powers by the highest value
+        //rescale the values by the highest value
         List<Double> valuesScaled = new ArrayList<>();
         for (double power : values) {
             valuesScaled.add(power / highest);
         }
 
-        runMotors(valuesScaled);
+        run(valuesScaled);
     }
 
     /**
@@ -115,26 +119,55 @@ public class NMotors {
      *
      * @param values the raw values to send to the motors
      */
-    public void runMotors(List<Double> values) {
+    public void run(List<Double> values) {
         if (values.size() != motors.size()) {
             throw new IllegalArgumentException("Argument 'values' must have the same length as the number of motors.");
         }
 
         //set the motor powers/speeds of each motor
         for (int i = 0; i < motors.size(); i++) {
+            Double value = Utility.motorLimit(values.get(i));
             if (useSpeedMode) {
-                ((MotorEnc) motors.get(i)).setSpeed(Utility.motorLimit(values.get(i)));
+                MotorEnc motorEnc = ((MotorEnc) motors.get(i));
+                motorEnc.setSpeed(value);
+                encoders[i] = motorEnc.getEncoderPosition();
             } else {
-                motors.get(i).setPower(Utility.motorLimit(values.get(i)));
+                motors.get(i).setPower(value);
             }
+            this.values[i] = value;
         }
+    }
+
+    /**
+     * @param i the index of the motor to read the value from
+     * @return the values most recently sent to the motors
+     */
+    public double getValue(int i) {
+        return values[i];
+    }
+
+    /**
+     * @param i the index of the motor to read the encoder value from
+     * @return the values of the motor encoders. All encoder values will be 0 if useSpeedMode is false
+     */
+    public int getEncoder(int i) {
+        return encoders[i];
     }
 
     /**
      * stop all the motors
      */
-    public void stopMotors() {
+    public void stop() {
         //create a list of the same length as motors filled with zeroes
-        runMotors(new ArrayList<>(Collections.nCopies(motors.size(), 0.0)));
+        run(new ArrayList<>(Collections.nCopies(motors.size(), 0.0)));
+    }
+
+    /**
+     * Send the motor commands to the motor controller
+     */
+    public void update() {
+        for (int i = 0; i < motors.size(); i++) {
+            motors.get(i).update();
+        }
     }
 }

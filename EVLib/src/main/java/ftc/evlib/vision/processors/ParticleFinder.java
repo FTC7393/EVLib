@@ -23,8 +23,8 @@ import ftc.evlib.vision.ImageUtil;
  *
  * An ImageProcessor that finds particles (field object)
  */
-public class ParticleFinder implements ImageProcessor<Particle> {
-    public static final String TAG = "ParticleFinder";
+public class ParticleFinder implements ImageProcessor<List<Particle>> {
+    private static final String TAG = "ParticleFinder";
     private static final int THICKNESS = 2;
     private static final Scalar[] colorChannels = {ImageUtil.RED, ImageUtil.GREEN, ImageUtil.BLUE};
 //    private static String[] colorNames = {"red", "green", "blue"};
@@ -38,9 +38,11 @@ public class ParticleFinder implements ImageProcessor<Particle> {
     private static final Particle.ParticleColor[] particleColors = {Particle.ParticleColor.RED, Particle.ParticleColor.BLUE};
 
     private final StepTimer stepTimer = new StepTimer(TAG);
+    private static final double MIN_S = 50;
+    private static final double MIN_V = 1;
 
     @Override
-    public ImageProcessorResult<Particle> process(long startTime, Mat rgbaFrame, boolean saveImages) {
+    public ImageProcessorResult<List<Particle>> process(long startTime, Mat rgbaFrame, boolean saveImages) {
         if (saveImages) {
             stepTimer.start();
             //save the raw camera image for logging
@@ -54,6 +56,38 @@ public class ParticleFinder implements ImageProcessor<Particle> {
         Imgproc.cvtColor(rgbaFrame, hsv, Imgproc.COLOR_RGB2HSV);
         stepTimer.log("rgb2hsv");
 
+
+        //calculate the hsv thresholds
+        //the h value goes from 0 to 179
+        //the s value goes from 0 to 255
+        //the v value goes from 0 to 255
+
+        //the values are stored as a list of min HSV and a list of max HSV
+        List<Scalar> thresholdMin = new ArrayList<>();
+        List<Scalar> thresholdMax = new ArrayList<>();
+
+//        thresholdMin.add(new Scalar((300) / 2, MIN_S, MIN_V));
+//        thresholdMax.add(new Scalar((60) / 2, 255, 255));
+//
+//        thresholdMin.add(new Scalar((60) / 2, MIN_S, MIN_V));
+//        thresholdMax.add(new Scalar((180) / 2, 255, 255));
+//
+//        thresholdMin.add(new Scalar((180) / 2, MIN_S, MIN_V));
+//        thresholdMax.add(new Scalar((300) / 2, 255, 255));
+
+        //larger red range
+        thresholdMin.add(new Scalar((304) / 2, MIN_S, MIN_V));
+        thresholdMax.add(new Scalar((16) / 2, 255, 255));
+
+        //1-value green range
+//        thresholdMin.add(new Scalar((60) / 2, 255, 255));
+//        thresholdMax.add(new Scalar((60) / 2, 255, 255));
+
+        // large blue range
+        thresholdMin.add(new Scalar((150) / 2, MIN_S, MIN_V));
+        thresholdMax.add(new Scalar((300) / 2, 255, 255));
+
+
         List<Particle> particles = new ArrayList<>();
 
         Mat maskedImage;
@@ -66,7 +100,7 @@ public class ParticleFinder implements ImageProcessor<Particle> {
             stepTimer.start();
             //apply HSV thresholds to get binary image
             maskedImage = new Mat();
-            ImageUtil.hsvInRange(hsv, ImageUtil.hsvThresholdMin.get(channel), ImageUtil.hsvThresholdMax.get(channel), maskedImage);
+            ImageUtil.hsvInRange(hsv, thresholdMin.get(c), thresholdMax.get(c), maskedImage);
 
             //blur the image and re-threshold to "de-bounce" the noisy sections
             Imgproc.blur(maskedImage, maskedImage, new Size(BLUR_AMOUNT, BLUR_AMOUNT));
@@ -102,7 +136,7 @@ public class ParticleFinder implements ImageProcessor<Particle> {
                     //fit an ellipse to the contour points
                     ellipse = Imgproc.fitEllipse(contour);
                     double area = ellipse.size.area() / frameArea;
-//        Log.i(TAG, "Ellipse Area: " + area);
+//                    Log.i(TAG, "Ellipse Area: " + area);
                     //filter out ellipses that are too big or too small
                     if (area >= MIN_AREA && area <= MAX_AREA) {
                         //find the ratio of the shortest side to the longest side
@@ -148,14 +182,19 @@ public class ParticleFinder implements ImageProcessor<Particle> {
             ImageUtil.saveImage(TAG, rgbaFrame, Imgproc.COLOR_GRAY2BGR, "03_final", startTime);
             stepTimer.log("save 03");
         }
+
+        Collections.sort(particles);
+
         Log.i(TAG, "num particles: " + particles.size());
         Log.i(TAG, "particles: " + particles);
-        if (particles.size() > 0) {
-            Collections.sort(particles);
-            Log.i(TAG, "particle[0]: " + particles.get(0));
-            return new ImageProcessorResult<>(startTime, rgbaFrame, particles.get(0));
-        } else {
-            return new ImageProcessorResult<>(startTime, rgbaFrame, null);
-        }
+
+        return new ImageProcessorResult<>(startTime, rgbaFrame, particles);
+//        if (particles.size() > 0) {
+//            Collections.sort(particles);
+//            Log.i(TAG, "particle[0]: " + particles.get(0));
+//            return new ImageProcessorResult<>(startTime, rgbaFrame, particles.get(0));
+//        } else {
+//            return new ImageProcessorResult<>(startTime, rgbaFrame, null);
+//        }
     }
 }
