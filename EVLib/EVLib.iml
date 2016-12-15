@@ -113,7 +113,7 @@
     <orderEntry type="library" exported="" name="ModernRobotics-release-" level="project" />
     <orderEntry type="library" exported="" name="WirelessP2p-release-" level="project" />
     <orderEntry type="library" exported="" name="Analytics-release-" level="project" />
-    <orderEntry type="library" exported="" name="state-machine-framework-0.6.0" level="project" />
+    <orderEntry type="library" exported="" name="state-machine-framework-0.6.1" level="project" />
     <orderEntry type="library" exported="" name="Hardware-release-" level="project" />
     <orderEntry type="library" exported="" name="FtcCommon-release-" level="project" />
     <orderEntry type="module" module-name="openCVLibrary310" exported="" />
