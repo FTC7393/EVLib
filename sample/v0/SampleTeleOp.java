@@ -94,6 +94,10 @@ public class SampleTeleOp extends OpMode {
 
         //send the command to the servo
         servo.setPosition(servoPosition);
+
+        //send the motor powers to the motor controller
+        leftMotor.update();
+        rightMotor.update();
     }
 
     @Override
