@@ -1,4 +1,7 @@
 # EVLib
+
+**This project is no longer maintained. Click [here](https://github.com/FTC7393/ftc_app_7393) for our current code.**
+
 A library for use in FTC projects. Includes state machine framework and guava. Depends on android and the FTC libraries.
 
 The EVLib library contains many of our helper classes that are used to drive the robot. This is a wrapper above the state machine framework, with helper classes for controlling a variety of hardware.
