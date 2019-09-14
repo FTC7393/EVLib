@@ -1,6 +1,8 @@
 # EVLib
 
-**This project is no longer maintained. Click [here](https://github.com/FTC7393/ftc_app_7393) for our current code.**
+**This project is now being maintained again by the new team.** 
+
+This is being used in our [app](https://github.com/FTC7393/SkyStone).
 
 A library for use in FTC projects. Includes state machine framework and guava. Depends on android and the FTC libraries.
 
